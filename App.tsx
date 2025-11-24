@@ -1,16 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AiTutor from './components/AiTutor';
 import ChapterView from './components/ChapterView';
 import { CHAPTERS, CHEAT_SHEET } from './data';
 import { View } from './types';
-import { Search, ArrowRight, FolderOpen, List, Terminal, Menu } from 'lucide-react';
+import { Search, ArrowRight, FolderOpen, List, Terminal, Menu, Trash2 } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
   const [currentChapterId, setCurrentChapterId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Persistence: Load completed exercises from localStorage
+  const [completedExercises, setCompletedExercises] = useState<Set<string>>(() => {
+    try {
+        const saved = localStorage.getItem('sysadmin101_progress');
+        return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch (e) {
+        return new Set();
+    }
+  });
+
+  const handleExerciseComplete = (exerciseId: string) => {
+    setCompletedExercises(prev => {
+        const newSet = new Set(prev);
+        if (!newSet.has(exerciseId)) {
+            newSet.add(exerciseId);
+            localStorage.setItem('sysadmin101_progress', JSON.stringify(Array.from(newSet)));
+        }
+        return newSet;
+    });
+  };
+
+  const handleResetProgress = () => {
+    if (confirm("Voulez-vous vraiment réinitialiser toute votre progression ?")) {
+        setCompletedExercises(new Set());
+        localStorage.removeItem('sysadmin101_progress');
+    }
+  };
 
   const handleViewChange = (view: View, chapterId?: string) => {
       setCurrentView(view);
@@ -32,7 +60,7 @@ export default function App() {
         <div className="relative z-10">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/20 px-3 py-1 rounded-full text-xs font-bold mb-6 text-blue-200">
                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                v2.1 • Terminal Interactif
+                v2.2 • Progression Sauvegardée
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white">
               Maîtrisez l'Administration <br/>
@@ -40,7 +68,7 @@ export default function App() {
             </h2>
             <p className="text-slate-300 max-w-2xl text-base md:text-lg mb-8 leading-relaxed font-light">
             Bienvenue dans le module R1.04. Cette plateforme interactive intègre un terminal Linux simulé directement dans votre navigateur. 
-            Sélectionnez un chapitre pour commencer à apprendre par la pratique.
+            Votre progression est automatiquement sauvegardée.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
             <button 
@@ -62,24 +90,45 @@ export default function App() {
 
       {/* Grid Layout */}
       <div>
-        <h3 className="text-xl font-bold text-slate-200 mb-6 flex items-center gap-3">
-            <div className="p-2 bg-slate-800 rounded-lg border border-slate-700">
-                <FolderOpen className="text-blue-400" size={20} />
-            </div>
-            Chapitres Disponibles
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-slate-200 flex items-center gap-3">
+                <div className="p-2 bg-slate-800 rounded-lg border border-slate-700">
+                    <FolderOpen className="text-blue-400" size={20} />
+                </div>
+                Chapitres Disponibles
+            </h3>
+            {completedExercises.size > 0 && (
+                <button 
+                    onClick={handleResetProgress}
+                    className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1 transition-colors"
+                >
+                    <Trash2 size={12} />
+                    Réinitialiser progression
+                </button>
+            )}
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {CHAPTERS.map((chapter, idx) => (
+            {CHAPTERS.map((chapter, idx) => {
+                const totalEx = chapter.exercises.length;
+                const completedCount = chapter.exercises.filter(ex => completedExercises.has(ex.id)).length;
+                const percent = totalEx === 0 ? 0 : Math.round((completedCount / totalEx) * 100);
+
+                return (
                 <div 
                     key={chapter.id}
                     onClick={() => handleViewChange(View.CHAPTER, chapter.id)}
-                    className="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all cursor-pointer group relative overflow-hidden"
+                    className="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all cursor-pointer group relative overflow-hidden flex flex-col h-full"
                 >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     
-                    <div className="relative z-10">
+                    <div className="relative z-10 flex-1">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-12 h-12 bg-slate-800 text-slate-400 rounded-xl flex items-center justify-center font-bold text-lg group-hover:bg-blue-900/30 group-hover:text-blue-400 transition-colors border border-slate-700 group-hover:border-blue-500/30">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg transition-colors border ${
+                                percent === 100 
+                                ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/30' 
+                                : 'bg-slate-800 text-slate-400 border-slate-700 group-hover:border-blue-500/30 group-hover:bg-blue-900/30 group-hover:text-blue-400'
+                            }`}>
                                 {idx + 1}
                             </div>
                             <span className="text-xs font-medium bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">
@@ -88,12 +137,24 @@ export default function App() {
                         </div>
                         <h4 className="font-bold text-slate-100 text-lg mb-2 group-hover:text-blue-400 transition-colors">{chapter.title}</h4>
                         <p className="text-slate-400 text-sm mb-6 line-clamp-2 leading-relaxed">{chapter.description}</p>
-                        <div className="flex items-center text-sm font-medium text-blue-400 gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                            Ouvrir le module <ArrowRight size={16} />
+                    </div>
+
+                    <div className="relative z-10 mt-auto">
+                        <div className="flex justify-between items-end mb-2">
+                             <span className="text-xs text-slate-500 font-medium">{completedCount}/{totalEx} Exercices</span>
+                             <span className={`text-xs font-bold ${percent === 100 ? 'text-emerald-400' : 'text-blue-400'}`}>{percent}%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                            <div 
+                                className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                                    percent === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-600 to-cyan-400'
+                                }`} 
+                                style={{width: `${percent}%`}}
+                            ></div>
                         </div>
                     </div>
                 </div>
-            ))}
+            )})}
         </div>
       </div>
     </div>
@@ -107,7 +168,13 @@ export default function App() {
       case View.CHAPTER:
         const chapter = CHAPTERS.find(c => c.id === currentChapterId);
         if (!chapter) return renderDashboard();
-        return <ChapterView chapter={chapter} />;
+        return (
+            <ChapterView 
+                chapter={chapter} 
+                completedExercises={completedExercises}
+                onCompleteExercise={handleExerciseComplete}
+            />
+        );
       
       case View.CHEATSHEET:
         return (

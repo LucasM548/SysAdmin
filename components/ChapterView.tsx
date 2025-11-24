@@ -9,6 +9,8 @@ import { getNode, resolvePath, executeCommand } from '../utils/fileSystem';
 
 interface ChapterViewProps {
   chapter: Chapter;
+  completedExercises: Set<string>;
+  onCompleteExercise: (id: string) => void;
 }
 
 type Tab = 'COURSE' | 'VISUALS' | 'EXERCISES' | 'IDE';
@@ -52,7 +54,7 @@ const ExerciseHint: React.FC<{ hint: string, compact?: boolean }> = ({ hint, com
   );
 };
 
-const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
+const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, onCompleteExercise }) => {
   const [activeTab, setActiveTab] = useState<Tab>('COURSE');
   const [mobileView, setMobileView] = useState<MobileTab>('CONTENT');
   
@@ -60,14 +62,12 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
   const [fs, setFs] = useState<FileSystemNode>(chapter.initialFileSystem);
   const [history, setHistory] = useState<TerminalOutput[]>([]);
   const [cwd, setCwd] = useState<string>('/home/etudiant');
-  const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
 
-  // Reset state when chapter changes
+  // Reset state when chapter changes (except completion which is passed as prop)
   useEffect(() => {
     setFs(JSON.parse(JSON.stringify(chapter.initialFileSystem)));
     setHistory([]);
     setCwd('/home/etudiant');
-    setCompletedExercises(new Set());
     setActiveTab('COURSE');
     setMobileView('CONTENT');
   }, [chapter.id]);
@@ -99,7 +99,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
 
         if (ex.validationType === 'command_success') {
             if (cmd.trim() === ex.validationValue && output.type !== 'error') {
-                setCompletedExercises(prev => new Set(prev).add(ex.id));
+                onCompleteExercise(ex.id);
             }
         }
     });
@@ -112,13 +112,13 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
           
           if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
               if (getNode(fs, ex.validationValue)) {
-                  setCompletedExercises(prev => new Set(prev).add(ex.id));
+                onCompleteExercise(ex.id);
               }
           }
           
           if (ex.validationType === 'cwd_check') {
               if (cwd === ex.validationValue) {
-                  setCompletedExercises(prev => new Set(prev).add(ex.id));
+                onCompleteExercise(ex.id);
               }
           }
 
@@ -126,12 +126,17 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
               const [path, contentMatch] = ex.validationValue.split(':');
               const node = getNode(fs, path);
               if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
-                  setCompletedExercises(prev => new Set(prev).add(ex.id));
+                onCompleteExercise(ex.id);
               }
           }
       });
-  }, [fs, cwd, chapter.exercises, completedExercises]);
+  }, [fs, cwd, chapter.exercises, completedExercises, onCompleteExercise]);
 
+
+  // Calc progress for current chapter
+  const currentChapterCompleted = chapter.exercises.filter(ex => completedExercises.has(ex.id)).length;
+  const currentChapterTotal = chapter.exercises.length;
+  const progressPercent = currentChapterTotal === 0 ? 0 : (currentChapterCompleted / currentChapterTotal) * 100;
 
   return (
     <div className="flex flex-col md:flex-row h-full border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-900 relative">
@@ -210,19 +215,37 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter }) => {
           >
             <CheckSquare size={14} />
             EXOS
-            {completedExercises.size > 0 && (
+            {currentChapterCompleted > 0 && (
                 <span className="ml-2 bg-emerald-900/50 text-emerald-400 px-1.5 rounded text-[10px]">
-                    {completedExercises.size}/{chapter.exercises.length}
+                    {currentChapterCompleted}/{currentChapterTotal}
                 </span>
             )}
           </button>
+        </div>
+
+        {/* Global Progress Bar (Slim) */}
+        <div className="h-1 w-full bg-slate-950 border-b border-slate-800">
+             <div 
+                className={`h-full transition-all duration-500 ease-out ${
+                    progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
+                }`} 
+                style={{ width: `${progressPercent}%` }}
+             />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-900 scrollbar-thin pb-20 md:pb-6">
           {activeTab === 'COURSE' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
                 <div className="mb-6 pb-4 border-b border-slate-800">
-                    <h2 className="text-2xl font-bold text-slate-100 mb-2">{chapter.title}</h2>
+                    <div className="flex justify-between items-start">
+                        <h2 className="text-2xl font-bold text-slate-100 mb-2">{chapter.title}</h2>
+                        {progressPercent === 100 && (
+                            <div className="flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/30">
+                                <CheckCircle size={14} />
+                                Terminé
+                            </div>
+                        )}
+                    </div>
                     <p className="text-slate-400 leading-relaxed">{chapter.description}</p>
                 </div>
               {chapter.lessons.map((lesson, idx) => (
