@@ -1,0 +1,5 @@
+{
+  "name": "SysAdmin 101: Linux & Scripting Companion",
+  "description": "Un compagnon d'étude interactif complet pour le cours de Systèmes d'Exploitation (R1.04). Comprend un cahier d'exercices numériques (TPs), des résumés de cours, un aide-mémoire de commandes et un tuteur Linux alimenté par IA utilisant Gemini.",
+  "requestFramePermissions": []
+}
