@@ -317,13 +317,77 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
           )}
 
           {activeTab === 'IDE' && (
-            <div className="h-full animate-in zoom-in-95 duration-200">
-              <CodeEditor
-                fs={fs}
-                setFs={setFs}
-                cwd={cwd}
-                onRun={handleEditorRun}
-              />
+            <div className="flex flex-col h-full gap-4 animate-in zoom-in-95 duration-200">
+              {/* Editor takes up 60% of available vertical space */}
+              <div className="flex-1 min-h-[50%]">
+                <CodeEditor
+                  fs={fs}
+                  setFs={setFs}
+                  cwd={cwd}
+                  onRun={handleEditorRun}
+                />
+              </div>
+
+              {/* Exercises List Compact View - Takes remaining space */}
+              <div className="flex-1 min-h-[30%] bg-slate-950 rounded-xl border border-slate-800 flex flex-col overflow-hidden">
+                <div className="px-4 py-2 bg-slate-900 border-b border-slate-800 shrink-0 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-300 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <CheckSquare size={14} className="text-emerald-500" />
+                    Exercices à réaliser
+                  </h3>
+                  <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
+                     {currentChapterCompleted}/{currentChapterTotal}
+                  </span>
+                </div>
+                <div className="p-3 overflow-y-auto scrollbar-thin space-y-3">
+                   {chapter.exercises.map((exercise, index) => {
+                      const isCompleted = completedExercises.has(exercise.id);
+                      // Sort: incomplete first
+                      if (isCompleted && chapter.exercises.some(e => !completedExercises.has(e.id))) return null; 
+                      
+                      return (
+                        <div
+                          key={exercise.id}
+                          className={`p-3 rounded-lg border transition-all ${isCompleted
+                            ? 'bg-emerald-900/10 border-emerald-500/20 opacity-60'
+                            : 'bg-slate-900/50 border-slate-800'
+                            }`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 ${isCompleted
+                              ? 'bg-emerald-500 text-white'
+                              : 'bg-slate-800 text-slate-500 border border-slate-700'
+                              }`}>
+                              {isCompleted ? <CheckCircle size={12} /> : index + 1}
+                            </div>
+                            <div className="flex-1">
+                              <p className={`text-xs font-medium leading-relaxed ${isCompleted ? 'text-slate-500' : 'text-slate-300'}`}>
+                                {exercise.question.split('`').map((part, i) =>
+                                  i % 2 === 1
+                                    ? <code key={i} className="bg-slate-950 px-1 py-0.5 rounded text-blue-300 font-mono text-[10px] border border-slate-800 mx-0.5">{part}</code>
+                                    : part
+                                )}
+                              </p>
+                              {!isCompleted && <ExerciseHint hint={exercise.hint} compact={true} />}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                   })}
+                   {/* Show message if all hidden (all done) */}
+                   {currentChapterCompleted > 0 && currentChapterCompleted < currentChapterTotal && (
+                      <div className="text-center py-2 text-[10px] text-slate-600 italic">
+                         Exercices terminés masqués
+                      </div>
+                   )}
+                   {currentChapterCompleted === currentChapterTotal && (
+                      <div className="flex flex-col items-center justify-center py-4 text-emerald-500 gap-2">
+                         <CheckCircle size={24} />
+                         <span className="text-sm font-bold">Tous les exercices validés !</span>
+                      </div>
+                   )}
+                </div>
+              </div>
             </div>
           )}
 
