@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
-import AiTutor from './components/AiTutor';
 import ChapterView from './components/ChapterView';
 import { CHAPTERS, CHEAT_SHEET } from './data';
 import { View } from './types';
@@ -77,12 +76,6 @@ export default function App() {
             >
                 Commencer Chapitre 1
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button 
-                onClick={() => handleViewChange(View.TUTOR)}
-                className="bg-slate-800/50 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors backdrop-blur-sm border border-slate-700 hover:border-slate-600"
-            >
-                Demander au Tuteur IA
             </button>
             </div>
         </div>
@@ -239,20 +232,6 @@ export default function App() {
             </div>
           </div>
         );
-
-      case View.TUTOR:
-        return (
-            <div className="animate-in slide-in-from-right-4 duration-500 h-full flex flex-col pb-20 md:pb-0">
-                <div className="mb-6 shrink-0">
-                    <h2 className="text-3xl font-bold text-slate-100">Tuteur Linux IA</h2>
-                    <p className="text-slate-400 flex items-center gap-2 mt-1">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Propulsé par Google Gemini
-                    </p>
-                </div>
-                <AiTutor />
-            </div>
-        );
       
       default:
         return renderDashboard();
@@ -267,6 +246,7 @@ export default function App() {
         onChangeView={handleViewChange}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        completedExercises={completedExercises}
       />
       
       <div className="flex-1 flex flex-col h-full w-full md:ml-64 relative z-10 transition-all duration-300">

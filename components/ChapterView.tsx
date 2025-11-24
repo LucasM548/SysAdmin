@@ -237,8 +237,8 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
           {activeTab === 'COURSE' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
                 <div className="mb-6 pb-4 border-b border-slate-800">
-                    <div className="flex justify-between items-start">
-                        <h2 className="text-2xl font-bold text-slate-100 mb-2">{chapter.title}</h2>
+                    <div className="flex justify-between items-start mb-4">
+                        <h2 className="text-2xl font-bold text-slate-100">{chapter.title}</h2>
                         {progressPercent === 100 && (
                             <div className="flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/30">
                                 <CheckCircle size={14} />
@@ -246,6 +246,29 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
                             </div>
                         )}
                     </div>
+
+                     {/* Progress Section */}
+                    <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-800 mb-6 backdrop-blur-sm">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                                <CheckSquare size={16} className="text-blue-500" />
+                                Progression des exercices
+                            </span>
+                            <span className="text-sm font-bold text-blue-400">{progressPercent.toFixed(0)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700/50">
+                            <div 
+                                className={`h-full transition-all duration-500 ease-out ${
+                                    progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
+                                }`} 
+                                style={{ width: `${progressPercent}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">
+                            {currentChapterCompleted} sur {currentChapterTotal} exercices validés.
+                        </p>
+                    </div>
+
                     <p className="text-slate-400 leading-relaxed">{chapter.description}</p>
                 </div>
               {chapter.lessons.map((lesson, idx) => (

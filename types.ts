@@ -1,9 +1,9 @@
 
+
 export enum View {
   DASHBOARD = 'DASHBOARD',
   CHAPTER = 'CHAPTER',
   CHEATSHEET = 'CHEATSHEET',
-  TUTOR = 'TUTOR',
 }
 
 export interface FileSystemNode {

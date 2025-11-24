@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, List, MessageSquare, LayoutDashboard, ChevronRight, FolderOpen, X } from 'lucide-react';
+import { Terminal, List, LayoutDashboard, ChevronRight, FolderOpen, X } from 'lucide-react';
 import { View } from '../types';
 import { CHAPTERS } from '../data';
 
@@ -9,9 +9,10 @@ interface SidebarProps {
   onChangeView: (view: View, chapterId?: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  completedExercises: Set<string>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, currentChapterId, onChangeView, isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, currentChapterId, onChangeView, isOpen, onClose, completedExercises }) => {
   return (
     <>
         {/* Backdrop for mobile */}
@@ -57,23 +58,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentChapterId, onChan
                     <LayoutDashboard size={18} />
                     <span className="font-medium">Tableau de bord</span>
                 </button>
-                <button
-                    onClick={() => onChangeView(View.TUTOR)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm border ${
-                    currentView === View.TUTOR 
-                        ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.1)]' 
-                        : 'border-transparent hover:bg-slate-900 hover:text-slate-200'
-                    }`}
-                >
-                    <MessageSquare size={18} />
-                    <span className="font-medium">Tuteur IA</span>
-                </button>
             </div>
 
             <div className="space-y-2">
                 <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Chapitres</div>
                 {CHAPTERS.map(chapter => {
                     const isActive = currentView === View.CHAPTER && currentChapterId === chapter.id;
+                    const completedCount = chapter.exercises.filter(ex => completedExercises.has(ex.id)).length;
+                    const total = chapter.exercises.length;
+                    const percent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
                     return (
                         <button
                         key={chapter.id}
@@ -88,7 +82,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentChapterId, onChan
                             <FolderOpen size={18} className={`shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-600 group-hover:text-slate-400'}`} />
                             <span className={`font-medium truncate ${isActive ? 'text-blue-100' : ''}`}>{chapter.title}</span>
                         </div>
-                        {isActive && <ChevronRight size={14} className="text-blue-500 shrink-0" />}
+                        <div className="flex items-center gap-2">
+                            {percent > 0 && (
+                                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                    percent === 100 
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                    : 'bg-slate-800 text-slate-500 border border-slate-700'
+                                }`}>
+                                    {percent}%
+                                </span>
+                            )}
+                            {isActive && <ChevronRight size={14} className="text-blue-500 shrink-0" />}
+                        </div>
                     </button>
                     );
                 })}
