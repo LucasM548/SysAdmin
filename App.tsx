@@ -51,7 +51,7 @@ export default function App() {
   );
 
   const renderDashboard = () => (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-24 md:pb-0">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-900/80 via-indigo-900/80 to-slate-900/80 border border-blue-500/20 rounded-3xl p-6 md:p-8 text-white shadow-2xl shadow-blue-900/10 relative overflow-hidden backdrop-blur-sm">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
@@ -171,7 +171,7 @@ export default function App() {
       
       case View.CHEATSHEET:
         return (
-          <div className="animate-in slide-in-from-right-4 duration-500 h-full flex flex-col pb-20 md:pb-0">
+          <div className="animate-in slide-in-from-right-4 duration-500 h-full flex flex-col pb-24 md:pb-0">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-slate-800 border border-slate-700 text-purple-400 rounded-xl shadow-lg shadow-purple-900/10">
@@ -239,7 +239,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans selection:bg-blue-500/30 bg-slate-950">
+    <div className="flex h-[100dvh] overflow-hidden font-sans selection:bg-blue-500/30 bg-slate-950">
       <Sidebar 
         currentView={currentView} 
         currentChapterId={currentChapterId} 
@@ -266,7 +266,7 @@ export default function App() {
               </button>
           </div>
 
-          <main className="flex-1 p-4 md:p-6 overflow-hidden h-full">
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto h-full scrollbar-thin">
             {renderContent()}
           </main>
       </div>

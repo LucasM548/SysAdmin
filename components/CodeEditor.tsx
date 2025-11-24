@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Save, FileCode, Eraser } from 'lucide-react';
+import { Play, Save, FileCode, Eraser, CheckCircle, AlertCircle } from 'lucide-react';
 import { FileSystemNode, TerminalOutput } from '../types';
 import { executeCommand, saveFile } from '../utils/fileSystem';
 
@@ -42,43 +42,50 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ fs, setFs, cwd, onRun }) => {
     // Removed border-slate-700 from main div to blend better with tab content
     <div className="bg-slate-950 rounded-xl border border-slate-800 shadow-lg flex flex-col h-full overflow-hidden">
       {/* Toolbar */}
-      <div className="bg-slate-900 p-2 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                <FileCode size={14} className="text-amber-500" />
-                <input 
-                    type="text" 
-                    value={filename}
-                    onChange={(e) => setFilename(e.target.value)}
-                    className="bg-transparent text-slate-300 text-xs font-mono focus:outline-none w-28"
-                />
+      <div className="bg-slate-900 p-2 border-b border-slate-800 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center justify-between min-w-[310px] gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 bg-slate-950 px-2 sm:px-3 py-1.5 rounded-lg border border-slate-800">
+                    <FileCode size={14} className="text-amber-500 shrink-0" />
+                    <input 
+                        type="text" 
+                        value={filename}
+                        onChange={(e) => setFilename(e.target.value)}
+                        className="bg-transparent text-slate-300 text-xs font-mono focus:outline-none w-24 sm:w-28"
+                    />
+                </div>
+                {/* Status: Text on Desktop, Icon on Mobile */}
+                <div className={`flex items-center gap-1.5 ${saveStatus === 'saved' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                    {saveStatus === 'saved' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+                    <span className="text-[10px] uppercase font-bold tracking-wider hidden sm:inline">
+                        {saveStatus === 'saved' ? 'Sauvegardé' : 'Modifié'}
+                    </span>
+                </div>
             </div>
-            <span className={`text-[10px] uppercase font-bold tracking-wider ${saveStatus === 'saved' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                {saveStatus === 'saved' ? 'Sauvegardé' : 'Non enregistré'}
-            </span>
-        </div>
-        <div className="flex gap-2">
-            <button 
-                onClick={() => setCode('#!/bin/bash\n\n')}
-                className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800 rounded transition-colors"
-                title="Effacer"
-            >
-                <Eraser size={16} />
-            </button>
-            <button 
-                onClick={handleSave}
-                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-colors text-xs font-bold"
-            >
-                <Save size={14} />
-                Save
-            </button>
-            <button 
-                onClick={handleRun}
-                className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors text-xs font-bold shadow-lg shadow-green-900/20"
-            >
-                <Play size={14} />
-                Run
-            </button>
+            
+            <div className="flex gap-2 shrink-0">
+                <button 
+                    onClick={() => setCode('#!/bin/bash\n\n')}
+                    className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800 rounded transition-colors"
+                    title="Effacer"
+                >
+                    <Eraser size={16} />
+                </button>
+                <button 
+                    onClick={handleSave}
+                    className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-colors text-xs font-bold"
+                >
+                    <Save size={14} />
+                    <span className="hidden xs:inline">Save</span>
+                </button>
+                <button 
+                    onClick={handleRun}
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors text-xs font-bold shadow-lg shadow-green-900/20"
+                >
+                    <Play size={14} />
+                    <span>Run</span>
+                </button>
+            </div>
         </div>
       </div>
 
