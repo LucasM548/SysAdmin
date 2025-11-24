@@ -143,9 +143,32 @@ const canWrite = (node: FileSystemNode, user: string = 'etudiant'): boolean => {
     return false;
 };
 
+// Helper: Evaluate arithmetic expression $((...))
+const evaluateMath = (expr: string): string | null => {
+    try {
+        // Security: Remove anything that isn't a number or basic math operator
+        const sanitized = expr.replace(/[^0-9\s+\-*/%()]/g, '');
+        
+        // If empty or invalid chars were stripped to empty (or just whitespace), abort
+        if (!sanitized.trim()) return null;
+
+        // Use Function to evaluate strictly math
+        const val = new Function(`return Math.floor(${sanitized})`)();
+        
+        // Ensure result is a finite number
+        if (!Number.isFinite(val) || Number.isNaN(val)) return null;
+
+        return val.toString();
+    } catch (e) {
+        return null; // Fail gracefully
+    }
+};
+
 // Helper: Variable substitution
 const substituteVariables = (text: string, variables: Record<string, string>): string => {
     let result = text;
+    
+    // 1. Substitute $VAR and ${VAR}
     for (const [key, val] of Object.entries(variables)) {
         // Safe regex escape for key
         const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -154,6 +177,22 @@ const substituteVariables = (text: string, variables: Record<string, string>): s
         // Replace ${VAR}
         result = result.replace(new RegExp(`\\$\\{${escapedKey}\\}`, 'g'), val);
     }
+
+    // 2. Substitute Arithmetic Expansion $(( ... ))
+    // This must happen after variable substitution (e.g. $(( $i * 2 )) -> $(( 1 * 2 )) -> 2)
+    const mathRegex = /\$\(\(([^)]+)\)\)/g;
+    if (mathRegex.test(result)) {
+        result = result.replace(mathRegex, (match, expr) => {
+            // If the expression still contains a $, it implies a variable that wasn't substituted.
+            // In a loop definition (e.g., inside runScriptLines for detection), this variable might 
+            // not be defined yet (e.g. $i). We should defer evaluation in this case.
+            if (expr.includes('$')) return match;
+            
+            const evalResult = evaluateMath(expr);
+            return evalResult !== null ? evalResult : match;
+        });
+    }
+
     return result;
 };
 
@@ -326,6 +365,7 @@ const runScriptLines = (
         }
 
         // Before loop processing, substitute variables in the line (e.g. for `seq $1`)
+        // NOTE: This now also handles $(( arithmetic )) before the loop parsing sees it
         const processedLine = substituteVariables(line, scriptVars);
 
         if (processedLine.startsWith('for ')) {
