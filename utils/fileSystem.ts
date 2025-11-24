@@ -63,6 +63,28 @@ export const DEFAULT_FS: FileSystemNode = {
             'passwd': { type: 'file', name: 'passwd', permissions: '-rw-r--r--', owner: 'root', content: 'root:x:0:0:root:/root:/bin/bash\netudiant:x:1000:1000:Etudiant,,,:/home/etudiant:/bin/bash' }
         } 
     },
+    'proc': {
+        type: 'directory',
+        name: 'proc',
+        permissions: 'dr-xr-xr-x',
+        owner: 'root',
+        children: {
+            'cpuinfo': {
+                type: 'file',
+                name: 'cpuinfo',
+                permissions: '-r--r--r--',
+                owner: 'root',
+                content: 'processor\t: 0\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz'
+            },
+            'meminfo': {
+                type: 'file',
+                name: 'meminfo',
+                permissions: '-r--r--r--',
+                owner: 'root',
+                content: 'MemTotal:       16306560 kB\nMemFree:         3245680 kB\nMemAvailable:   10234560 kB\nBuffers:          456120 kB\nCached:          5678900 kB'
+            }
+        }
+    },
     'tmp': { type: 'directory', name: 'tmp', permissions: 'drwxrwxrwt', owner: 'root', children: {} }
   }
 };
@@ -237,6 +259,11 @@ const runSingleCommand = (
         case 'ls': {
             const showDetails = hasFlag(params, 'l');
             const showAll = hasFlag(params, 'a');
+            const reverse = hasFlag(params, 'r');
+            // We allow t and S flags to prevent errors, even if sim logic is basic
+            const sortByTime = hasFlag(params, 't');
+            const sortBySize = hasFlag(params, 'S');
+
             const pathArgs = params.filter(p => !p.startsWith('-'));
             
             // Helper to process one directory/file
@@ -257,13 +284,34 @@ const runSingleCommand = (
                 
                 // Directory
                 if (node.children) {
-                    let files = Object.keys(node.children).sort();
+                    let files = Object.keys(node.children);
+                    
                     if (!showAll) {
                         files = files.filter(name => !name.startsWith('.'));
                     } else {
                         files = ['.', '..', ...files];
                     }
                     
+                    // Simple Sort Logic
+                    files.sort(); // default alpha
+                    
+                    if (sortBySize) {
+                        files.sort((a, b) => {
+                           // Mock size: Dir = 4096, File = content.length
+                           const getNodeSize = (n: string) => {
+                               if (n === '.' || n === '..') return 4096;
+                               const child = node.children![n];
+                               return child.type === 'directory' ? 4096 : (child.content?.length || 0);
+                           };
+                           return getNodeSize(b) - getNodeSize(a); // Descending
+                        });
+                    }
+                    // Time sort is mocked to be same order or reverse of alpha in this basic sim
+
+                    if (reverse) {
+                        files.reverse();
+                    }
+
                     if (showDetails) {
                         const lines = files.map(name => {
                             if (name === '.' || name === '..') return `drwxr-xr-x 1 etudiant etudiant 4096 Jun 14 12:00 ${name}`;
@@ -300,12 +348,17 @@ const runSingleCommand = (
             return { id: uid(), type: 'output', content: cwd };
 
         case 'cd': {
-            if (!params[0]) return { id: uid(), type: 'success', content: '', cwd: '/home/etudiant' };
-            const targetPath = resolvePath(cwd, params[0]);
+            let targetParam = params[0];
+            // Handle 'cd' alone -> cd ~
+            if (!targetParam) targetParam = '~';
+            // Handle 'cd -' (mocked to home/previous toggle logic)
+            if (targetParam === '-') targetParam = '~'; // Simplified for this sim
+
+            const targetPath = resolvePath(cwd, targetParam);
             const node = getNode(currentFs, targetPath);
             
             if (!node || node.type !== 'directory') {
-                return { id: uid(), type: 'error', content: `cd: ${params[0]}: Aucun fichier ou dossier de ce type` };
+                return { id: uid(), type: 'error', content: `cd: ${targetParam}: Aucun fichier ou dossier de ce type` };
             }
             return { id: uid(), type: 'success', content: '', cwd: targetPath };
         }
@@ -381,8 +434,20 @@ const runSingleCommand = (
                 const targetPath = resolvePath(cwd, file);
                 const [parent, name] = getParentAndName(targetPath, currentFs);
 
-                if (!parent || parent.type !== 'directory') return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Aucun fichier ou dossier de ce type` };
+                if (!parent || parent.type !== 'directory') {
+                    // It might be that the directory doesn't exist, check logic
+                    return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Aucun fichier ou dossier de ce type` };
+                }
                 
+                // If checking permissions, we should check parent write permission here.
+                if (parent.permissions.includes('w-') || parent.permissions === 'drwxr-xr-x') {
+                     // Check specific 'w' logic if owner is not etudiant, etc. 
+                     // Simplified: if permissions string explicitly excludes w for user/others...
+                     if (parent.permissions.indexOf('w') === -1) {
+                         return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Permission non accordée` };
+                     }
+                }
+
                 if (parent.children && !parent.children[name]) {
                     parent.children[name] = {
                         type: 'file',
@@ -528,38 +593,47 @@ const runSingleCommand = (
         }
 
         case 'chmod': {
-            if (params.length < 2) return { id: uid(), type: 'error', content: 'chmod: opérande manquant' };
-            const mode = params[0];
-            const files = params.slice(1);
+            const recursive = hasFlag(params, 'R');
+            const args = params.filter(p => !p.startsWith('-'));
+            if (args.length < 2) return { id: uid(), type: 'error', content: 'chmod: opérande manquant' };
+            const mode = args[0];
+            const files = args.slice(1);
             
+            const updatePerms = (node: FileSystemNode) => {
+                 let newPerms = node.permissions;
+                const typeChar = node.type === 'directory' ? 'd' : '-';
+                
+                // Simplified symbolic logic
+                if (mode === '777') newPerms = typeChar + 'rwxrwxrwx';
+                else if (mode === '755') newPerms = typeChar + 'rwxr-xr-x';
+                else if (mode === '555') newPerms = typeChar + 'r-xr-xr-x';
+                else if (mode === '644') newPerms = typeChar + 'rw-r--r--';
+                else if (mode === '600') newPerms = typeChar + 'rw-------';
+                else if (mode === '+x' || mode === 'u+x') {
+                    const arr = newPerms.split('');
+                    if (arr[3] === '-') arr[3] = 'x'; // user
+                    newPerms = arr.join('');
+                } else if (mode === 'u+w') {
+                     const arr = newPerms.split('');
+                    if (arr[2] === '-') arr[2] = 'w';
+                    newPerms = arr.join('');
+                } else if (mode === '-w') {
+                     newPerms = typeChar + 'r-xr-xr-x'; // Nuking write for sim simplicity
+                }
+                
+                node.permissions = newPerms;
+
+                if (recursive && node.type === 'directory' && node.children) {
+                    Object.values(node.children).forEach(child => updatePerms(child));
+                }
+            };
+
             for (const file of files) {
                 const targetPath = resolvePath(cwd, file);
                 const node = getNode(currentFs, targetPath);
                 
                 if (!node) return { id: uid(), type: 'error', content: `chmod: impossible d'accéder à '${file}': Aucun fichier ou dossier de ce type` };
-
-                let newPerms = node.permissions;
-                const typeChar = node.type === 'directory' ? 'd' : '-';
-                
-                if (mode === '777') newPerms = typeChar + 'rwxrwxrwx';
-                else if (mode === '755') newPerms = typeChar + 'rwxr-xr-x';
-                else if (mode === '644') newPerms = typeChar + 'rw-r--r--';
-                else if (mode === '600') newPerms = typeChar + 'rw-------';
-                else if (mode === '+x') {
-                    const arr = newPerms.split('');
-                    if (arr[3] === '-') arr[3] = 'x';
-                    if (arr[6] === '-') arr[6] = 'x';
-                    if (arr[9] === '-') arr[9] = 'x';
-                    newPerms = arr.join('');
-                } else if (mode === '-x') {
-                    const arr = newPerms.split('');
-                    if (arr[3] === 'x') arr[3] = '-';
-                    if (arr[6] === 'x') arr[6] = '-';
-                    if (arr[9] === 'x') arr[9] = '-';
-                    newPerms = arr.join('');
-                }
-                
-                node.permissions = newPerms;
+                updatePerms(node);
             }
             
             setFs(currentFs);
@@ -743,6 +817,7 @@ const runSingleCommand = (
         case 'sort': {
             const reverse = hasFlag(params, 'r');
             const numeric = hasFlag(params, 'n');
+            // Mock support for -k
             const fileParam = params.find(p => !p.startsWith('-'));
             
             const content = getTextContent(fileParam);
@@ -752,7 +827,12 @@ const runSingleCommand = (
             lines.sort();
             
             if (numeric) {
-                lines.sort((a, b) => parseInt(a) - parseInt(b));
+                // If numeric, try to find the first number in the line
+                lines.sort((a, b) => {
+                    const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+                    const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+                    return numA - numB;
+                });
             }
             if (reverse) {
                 lines.reverse();
@@ -774,14 +854,41 @@ const runSingleCommand = (
             return { id: uid(), type: 'success', content: '' };
         }
 
+        case 'id':
+            return { id: uid(), type: 'output', content: 'uid=1000(etudiant) gid=1000(etudiant) groups=1000(etudiant),4(adm),24(cdrom),27(sudo)' };
+
+        case 'whoami':
+            return { id: uid(), type: 'output', content: 'etudiant' };
+
+        case 'date': {
+            const now = new Date();
+            // Basic support for +%s (timestamp)
+            if (params[0] === '+%s') {
+                return { id: uid(), type: 'output', content: Math.floor(now.getTime() / 1000).toString() };
+            }
+            return { id: uid(), type: 'output', content: now.toString() };
+        }
+
         case 'help':
-            return { id: uid(), type: 'output', content: 'Commandes supportées: ls, cd, pwd, mkdir, touch, cp, mv, rm, cat, echo, grep, wc, sort, head, tail, chmod, ps, kill, clear, ./script.sh' };
+            return { id: uid(), type: 'output', content: 'Commandes supportées: ls, cd, pwd, mkdir, touch, cp, mv, rm, cat, echo, grep, wc, sort, head, tail, chmod, ps, kill, clear, id, whoami, date, ./script.sh' };
 
         case 'clear':
             return { id: uid(), type: 'output', content: '__CLEAR__' };
 
-        case 'echo':
-            return { id: uid(), type: 'output', content: params.join(' ') };
+        case 'echo': {
+            // Check for -e flag anywhere in params to enable escape interpretation
+            const interpretEscapes = params.some(p => p.startsWith('-') && p.includes('e'));
+            
+            // Filter out any flag arguments (starting with -)
+            const textParts = params.filter(p => !p.startsWith('-'));
+            let text = textParts.join(' ');
+            
+            if (interpretEscapes) {
+                // Manually handle the escapes. Note: the parser preserves literal backslashes from input
+                text = text.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\\\/g, '\\');
+            }
+            return { id: uid(), type: 'output', content: text };
+        }
 
         case '':
             return { id: uid(), type: 'success', content: '' };

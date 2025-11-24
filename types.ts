@@ -32,8 +32,8 @@ export interface Exercise {
   id: string;
   question: string;
   hint: string;
-  validationType: 'command_success' | 'file_exists' | 'dir_exists' | 'file_content' | 'cwd_check';
-  validationValue: string; // The command expected, the file path, or "filename:content_string"
+  validationType: 'command_success' | 'file_exists' | 'dir_exists' | 'file_content' | 'cwd_check' | 'output_match';
+  validationValue: string; // The command expected, the file path, or "filename:content_string", or substring to match in output
   completed: boolean;
 }
 

@@ -102,6 +102,14 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
           onCompleteExercise(ex.id);
         }
       }
+
+      if (ex.validationType === 'output_match') {
+         // Check if the output content contains the expected string
+         // We also check command_success logic implicitly because output.type shouldn't be error usually
+         if (output.type !== 'error' && output.content.includes(ex.validationValue)) {
+             onCompleteExercise(ex.id);
+         }
+      }
     });
   };
 
