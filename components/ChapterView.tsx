@@ -57,7 +57,7 @@ const ExerciseHint: React.FC<{ hint: string, compact?: boolean }> = ({ hint, com
 const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, onCompleteExercise }) => {
   const [activeTab, setActiveTab] = useState<Tab>('COURSE');
   const [mobileView, setMobileView] = useState<MobileTab>('CONTENT');
-  
+
   // Terminal State
   const [fs, setFs] = useState<FileSystemNode>(chapter.initialFileSystem);
   const [history, setHistory] = useState<TerminalOutput[]>([]);
@@ -74,62 +74,62 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
 
   // Execute command from Editor
   const handleEditorRun = (cmd: string) => {
-      // This simulates typing the command in the terminal
-      setExternalCommand(cmd);
-      // On mobile, switch to terminal view to see output
-      if (window.innerWidth < 768) {
-          setMobileView('TERMINAL');
-      }
+    // This simulates typing the command in the terminal
+    setExternalCommand(cmd);
+    // On mobile, switch to terminal view to see output
+    if (window.innerWidth < 768) {
+      setMobileView('TERMINAL');
+    }
   };
 
   const [externalCommand, setExternalCommand] = useState<string | null>(null);
 
   // Clear external command after processing
   useEffect(() => {
-      if (externalCommand) {
-          const timer = setTimeout(() => setExternalCommand(null), 100);
-          return () => clearTimeout(timer);
-      }
+    if (externalCommand) {
+      const timer = setTimeout(() => setExternalCommand(null), 100);
+      return () => clearTimeout(timer);
+    }
   }, [externalCommand]);
 
 
   const handleCommandExecuted = (cmd: string, output: TerminalOutput) => {
     chapter.exercises.forEach(ex => {
-        if (completedExercises.has(ex.id)) return;
+      if (completedExercises.has(ex.id)) return;
 
-        if (ex.validationType === 'command_success') {
-            if (cmd.trim() === ex.validationValue && output.type !== 'error') {
-                onCompleteExercise(ex.id);
-            }
+      if (ex.validationType === 'command_success') {
+        if (cmd.trim() === ex.validationValue && output.type !== 'error') {
+          onCompleteExercise(ex.id);
         }
+      }
     });
   };
 
   // Effect to check FS-based objectives whenever FS or CWD changes
   useEffect(() => {
-      chapter.exercises.forEach(ex => {
-          if (completedExercises.has(ex.id)) return;
-          
-          if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
-              if (getNode(fs, ex.validationValue)) {
-                onCompleteExercise(ex.id);
-              }
-          }
-          
-          if (ex.validationType === 'cwd_check') {
-              if (cwd === ex.validationValue) {
-                onCompleteExercise(ex.id);
-              }
-          }
+    chapter.exercises.forEach(ex => {
+      if (completedExercises.has(ex.id)) return;
 
-          if (ex.validationType === 'file_content') {
-              const [path, contentMatch] = ex.validationValue.split(':');
-              const node = getNode(fs, path);
-              if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
-                onCompleteExercise(ex.id);
-              }
-          }
-      });
+      if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
+        if (getNode(fs, ex.validationValue)) {
+          onCompleteExercise(ex.id);
+        }
+      }
+
+      if (ex.validationType === 'cwd_check') {
+        if (cwd === ex.validationValue) {
+          onCompleteExercise(ex.id);
+        }
+      }
+
+      if (ex.validationType === 'file_content') {
+        const [path, contentMatch] = ex.validationValue.split(':');
+        const node = getNode(fs, path);
+        if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
+          onCompleteExercise(ex.id);
+        }
+      }
+    });
   }, [fs, cwd, chapter.exercises, completedExercises, onCompleteExercise]);
 
 
@@ -140,27 +140,25 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
 
   return (
     <div className="flex flex-col md:flex-row h-full min-h-[600px] md:min-h-[700px] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-900 relative">
-      
+
       {/* Mobile Toggle Header (Visible only on small screens) */}
       <div className="md:hidden bg-slate-950 border-b border-slate-800 flex p-1 shrink-0">
-          <button 
-            onClick={() => setMobileView('CONTENT')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 ${
-                mobileView === 'CONTENT' ? 'bg-slate-800 text-white' : 'text-slate-500'
+        <button
+          onClick={() => setMobileView('CONTENT')}
+          className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 ${mobileView === 'CONTENT' ? 'bg-slate-800 text-white' : 'text-slate-500'
             }`}
-          >
-              <Book size={16} />
-              Contenu
-          </button>
-          <button 
-            onClick={() => setMobileView('TERMINAL')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 ${
-                mobileView === 'TERMINAL' ? 'bg-slate-800 text-white' : 'text-slate-500'
+        >
+          <Book size={16} />
+          Contenu
+        </button>
+        <button
+          onClick={() => setMobileView('TERMINAL')}
+          className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 ${mobileView === 'TERMINAL' ? 'bg-slate-800 text-white' : 'text-slate-500'
             }`}
-          >
-              <Monitor size={16} />
-              Terminal
-          </button>
+        >
+          <Monitor size={16} />
+          Terminal
+        </button>
       </div>
 
       {/* Left Panel: Content (Course/Exos) - Hidden on mobile if Terminal view selected */}
@@ -169,113 +167,107 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
         <div className="flex border-b border-slate-800 bg-slate-950 overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab('COURSE')}
-            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${
-              activeTab === 'COURSE' 
-                ? 'border-blue-500 bg-slate-900 text-blue-400' 
-                : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
-            }`}
+            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${activeTab === 'COURSE'
+              ? 'border-blue-500 bg-slate-900 text-blue-400'
+              : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
+              }`}
           >
             <BookOpen size={14} />
             COURS
           </button>
           <button
             onClick={() => setActiveTab('VISUALS')}
-            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${
-              activeTab === 'VISUALS' 
-                ? 'border-purple-500 bg-slate-900 text-purple-400' 
-                : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
-            }`}
+            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${activeTab === 'VISUALS'
+              ? 'border-purple-500 bg-slate-900 text-purple-400'
+              : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
+              }`}
           >
             <Layout size={14} />
-            VISUEL
+            {chapter.id === 'chap5' ? 'VISUEL/CALCULATEUR' : 'VISUEL'}
           </button>
-          
+
           {/* Specialized IDE Tab for Chapter 6 */}
           {chapter.id === 'chap6' && (
-              <button
-                onClick={() => setActiveTab('IDE')}
-                className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${
-                  activeTab === 'IDE' 
-                    ? 'border-amber-500 bg-slate-900 text-amber-400' 
-                    : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
+            <button
+              onClick={() => setActiveTab('IDE')}
+              className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${activeTab === 'IDE'
+                ? 'border-amber-500 bg-slate-900 text-amber-400'
+                : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
                 }`}
-              >
-                <Code size={14} />
-                LABO
-              </button>
+            >
+              <Code size={14} />
+              LABO
+            </button>
           )}
 
           <button
             onClick={() => setActiveTab('EXERCISES')}
-            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${
-              activeTab === 'EXERCISES' 
-                ? 'border-emerald-500 bg-slate-900 text-emerald-400' 
-                : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
-            }`}
+            className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${activeTab === 'EXERCISES'
+              ? 'border-emerald-500 bg-slate-900 text-emerald-400'
+              : 'border-transparent bg-slate-950 text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'
+              }`}
           >
             <CheckSquare size={14} />
             EXOS
             {currentChapterCompleted > 0 && (
-                <span className="ml-2 bg-emerald-900/50 text-emerald-400 px-1.5 rounded text-[10px]">
-                    {currentChapterCompleted}/{currentChapterTotal}
-                </span>
+              <span className="ml-2 bg-emerald-900/50 text-emerald-400 px-1.5 rounded text-[10px]">
+                {currentChapterCompleted}/{currentChapterTotal}
+              </span>
             )}
           </button>
         </div>
 
         {/* Global Progress Bar (Slim) */}
         <div className="h-1 w-full bg-slate-950 border-b border-slate-800 shrink-0">
-             <div 
-                className={`h-full transition-all duration-500 ease-out ${
-                    progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
-                }`} 
-                style={{ width: `${progressPercent}%` }}
-             />
+          <div
+            className={`h-full transition-all duration-500 ease-out ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
+              }`}
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-900 scrollbar-thin pb-20 md:pb-6">
           {activeTab === 'COURSE' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
-                <div className="mb-6 pb-4 border-b border-slate-800">
-                    <div className="flex justify-between items-start mb-4">
-                        <h2 className="text-2xl font-bold text-slate-100">{chapter.title}</h2>
-                        {progressPercent === 100 && (
-                            <div className="flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/30">
-                                <CheckCircle size={14} />
-                                Terminé
-                            </div>
-                        )}
+              <div className="mb-6 pb-4 border-b border-slate-800">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-2xl font-bold text-slate-100">{chapter.title}</h2>
+                  {progressPercent === 100 && (
+                    <div className="flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/30">
+                      <CheckCircle size={14} />
+                      Terminé
                     </div>
-
-                     {/* Progress Section */}
-                    <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-800 mb-6 backdrop-blur-sm">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                                <CheckSquare size={16} className="text-blue-500" />
-                                Progression des exercices
-                            </span>
-                            <span className="text-sm font-bold text-blue-400">{progressPercent.toFixed(0)}%</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700/50">
-                            <div 
-                                className={`h-full transition-all duration-500 ease-out ${
-                                    progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
-                                }`} 
-                                style={{ width: `${progressPercent}%` }}
-                            />
-                        </div>
-                        <p className="text-xs text-slate-500 mt-2">
-                            {currentChapterCompleted} sur {currentChapterTotal} exercices validés.
-                        </p>
-                    </div>
-
-                    <p className="text-slate-400 leading-relaxed">{chapter.description}</p>
+                  )}
                 </div>
+
+                {/* Progress Section */}
+                <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-800 mb-6 backdrop-blur-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                      <CheckSquare size={16} className="text-blue-500" />
+                      Progression des exercices
+                    </span>
+                    <span className="text-sm font-bold text-blue-400">{progressPercent.toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700/50">
+                    <div
+                      className={`h-full transition-all duration-500 ease-out ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-blue-500'
+                        }`}
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    {currentChapterCompleted} sur {currentChapterTotal} exercices validés.
+                  </p>
+                </div>
+
+                <p className="text-slate-400 leading-relaxed">{chapter.description}</p>
+              </div>
               {chapter.lessons.map((lesson, idx) => (
                 <div key={idx} className="bg-slate-950/50 p-6 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
                   <h3 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-3">
                     <span className="w-6 h-6 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/20">
-                        {idx + 1}
+                      {idx + 1}
                     </span>
                     {lesson.title}
                   </h3>
@@ -283,23 +275,23 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
                     {lesson.content.map((point, i) => (
                       <li key={i} className="text-slate-400 text-sm leading-relaxed flex items-start gap-3">
                         <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>
-                        <span dangerouslySetInnerHTML={{__html: point.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1.5 py-0.5 rounded text-blue-300 font-mono text-xs border border-slate-700">$1</code>')}}></span>
+                        <span dangerouslySetInnerHTML={{ __html: point.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1.5 py-0.5 rounded text-blue-300 font-mono text-xs border border-slate-700">$1</code>') }}></span>
                       </li>
                     ))}
                   </ul>
                   {lesson.code && (
                     <div className="bg-slate-950 rounded-lg border border-slate-800 overflow-hidden group relative">
-                        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border-b border-slate-800">
-                            <div className="flex gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                            </div>
-                            <span className="text-[10px] text-slate-500 font-mono">BASH</span>
+                      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border-b border-slate-800">
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
                         </div>
-                        <div className="p-3 overflow-x-auto">
-                            <pre className="text-sm font-mono text-blue-300 whitespace-pre">{lesson.code}</pre>
-                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono">BASH</span>
+                      </div>
+                      <div className="p-3 overflow-x-auto">
+                        <pre className="text-sm font-mono text-blue-300 whitespace-pre">{lesson.code}</pre>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -308,72 +300,70 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
           )}
 
           {activeTab === 'VISUALS' && (
-             <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300 flex flex-col min-h-full">
-                <PermissionVisualizer />
-                <div className="flex-1 min-h-[400px]">
-                    <FileSystemVisualizer root={fs} />
-                </div>
-             </div>
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300 flex flex-col min-h-full">
+              {chapter.id === 'chap5' && <PermissionVisualizer />}
+              <div className="flex-1 min-h-[400px]">
+                <FileSystemVisualizer root={fs} />
+              </div>
+            </div>
           )}
 
           {activeTab === 'IDE' && (
-              <div className="h-full animate-in zoom-in-95 duration-200">
-                  <CodeEditor 
-                    fs={fs} 
-                    setFs={setFs} 
-                    cwd={cwd} 
-                    onRun={handleEditorRun} 
-                  />
-              </div>
+            <div className="h-full animate-in zoom-in-95 duration-200">
+              <CodeEditor
+                fs={fs}
+                setFs={setFs}
+                cwd={cwd}
+                onRun={handleEditorRun}
+              />
+            </div>
           )}
 
           {activeTab === 'EXERCISES' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                    <CheckSquare className="text-emerald-500" />
-                    Exercices Pratiques
+                  <CheckSquare className="text-emerald-500" />
+                  Exercices Pratiques
                 </h3>
                 <span className="text-xs bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded border border-emerald-500/30 font-medium">
-                    {currentChapterCompleted} / {currentChapterTotal} complétés
+                  {currentChapterCompleted} / {currentChapterTotal} complétés
                 </span>
               </div>
-              
+
               <div className="grid gap-4">
                 {chapter.exercises.map((exercise, index) => {
                   const isCompleted = completedExercises.has(exercise.id);
                   return (
-                    <div 
-                        key={exercise.id} 
-                        className={`p-5 rounded-xl border transition-all duration-300 ${
-                            isCompleted 
-                            ? 'bg-emerald-900/10 border-emerald-500/30' 
-                            : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    <div
+                      key={exercise.id}
+                      className={`p-5 rounded-xl border transition-all duration-300 ${isCompleted
+                        ? 'bg-emerald-900/10 border-emerald-500/30'
+                        : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                         }`}
                     >
                       <div className="flex gap-4">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
-                            isCompleted 
-                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
-                            : 'bg-slate-800 text-slate-500'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${isCompleted
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                          : 'bg-slate-800 text-slate-500'
+                          }`}>
                           {isCompleted ? <CheckCircle size={18} /> : index + 1}
                         </div>
                         <div className="flex-1 pt-1">
                           <p className={`text-sm font-medium leading-relaxed ${isCompleted ? 'text-slate-400' : 'text-slate-200'}`}>
-                            {exercise.question.split('`').map((part, i) => 
-                                i % 2 === 1 
-                                ? <code key={i} className="bg-slate-800 px-1.5 py-0.5 rounded text-blue-300 font-mono text-xs border border-slate-700 mx-0.5">{part}</code> 
+                            {exercise.question.split('`').map((part, i) =>
+                              i % 2 === 1
+                                ? <code key={i} className="bg-slate-800 px-1.5 py-0.5 rounded text-blue-300 font-mono text-xs border border-slate-700 mx-0.5">{part}</code>
                                 : part
                             )}
                           </p>
-                          
+
                           <ExerciseHint hint={exercise.hint} />
 
                           {isCompleted && (
-                              <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/50 px-2 py-1 rounded border border-emerald-500/20">
-                                  <CheckCircle size={12} /> Validé
-                              </div>
+                            <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/50 px-2 py-1 rounded border border-emerald-500/20">
+                              <CheckCircle size={12} /> Validé
+                            </div>
                           )}
                         </div>
                       </div>
@@ -396,24 +386,24 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-800 border border-slate-700">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-[10px] text-slate-400 font-mono">bash 5.1</span>
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-[10px] text-slate-400 font-mono">bash 5.1</span>
             </div>
           </div>
         </div>
 
         {/* Terminal Component */}
         <div className="flex-1 overflow-hidden relative">
-            <Terminal 
-                fs={fs} 
-                setFs={setFs} 
-                history={history} 
-                setHistory={setHistory} 
-                cwd={cwd} 
-                setCwd={setCwd}
-                onCommandExecuted={handleCommandExecuted}
-                externalCommand={externalCommand}
-            />
+          <Terminal
+            fs={fs}
+            setFs={setFs}
+            history={history}
+            setHistory={setHistory}
+            cwd={cwd}
+            setCwd={setCwd}
+            onCommandExecuted={handleCommandExecuted}
+            externalCommand={externalCommand}
+          />
         </div>
       </div>
     </div>
