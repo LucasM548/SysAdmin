@@ -133,6 +133,32 @@ const isExecutable = (permissions: string): boolean => {
     return permissions.includes('x');
 };
 
+// Helper: Check if user has write permission on a node
+// Currently simulation assumes user is 'etudiant'
+const canWrite = (node: FileSystemNode, user: string = 'etudiant'): boolean => {
+    // Root bypass? No, we simulate permission denied for non-root users
+    if (user === 'root') return true;
+
+    // Check if 777 or rwx for all
+    // drwxrwxrwx -> indices 2, 5, 8 are w.
+    // permissions string format: [type][u_r][u_w][u_x][g_r][g_w][g_x][o_r][o_w][o_x]
+    
+    // Owner check
+    if (node.owner === user) {
+        return node.permissions[2] === 'w';
+    }
+
+    // Group check (Simplified: assume single group 'etudiant' matches owner)
+    // If owner matches 'etudiant', it falls in above case.
+    // If owner != etudiant, we might check 'others' or 'group' if we simulated groups better.
+    // For now, assume etudiant is in 'others' category for root files.
+    
+    // Others check (index 8 is other write)
+    if (node.permissions[8] === 'w') return true;
+
+    return false;
+};
+
 // Helper: Variable substitution
 const substituteVariables = (text: string, variables: Record<string, string>): string => {
     let result = text;
@@ -208,6 +234,11 @@ export const saveFile = (
     return false;
   }
 
+  // Permission check for saving
+  if (!canWrite(parentNode)) {
+      return false;
+  }
+
   if (!parentNode.children) {
       parentNode.children = {};
   }
@@ -215,6 +246,9 @@ export const saveFile = (
   // Update or Create file
   if (parentNode.children[filename]) {
       if (parentNode.children[filename].type === 'directory') return false;
+      // Also check write permission on file itself if it exists
+      if (!canWrite(parentNode.children[filename])) return false;
+      
       parentNode.children[filename].content = content;
       if (permissions) {
           parentNode.children[filename].permissions = permissions;
@@ -382,6 +416,12 @@ const runSingleCommand = (
                         if (!current.children) current.children = {};
                         
                         if (!current.children[part]) {
+                            // Permission check: Need write on current folder to create child
+                            if (!canWrite(current)) {
+                                lastError = { id: uid(), type: 'error', content: `mkdir: impossible de créer le répertoire '${pathArg}': Permission non accordée` };
+                                break;
+                            }
+
                             current.children[part] = {
                                 type: 'directory',
                                 name: part,
@@ -406,6 +446,12 @@ const runSingleCommand = (
                     }
                     if (parent.children && parent.children[name]) {
                         lastError = { id: uid(), type: 'error', content: `mkdir: impossible de créer le répertoire '${pathArg}': Le fichier existe` };
+                        continue;
+                    }
+
+                    // Permission check
+                    if (!canWrite(parent)) {
+                        lastError = { id: uid(), type: 'error', content: `mkdir: impossible de créer le répertoire '${pathArg}': Permission non accordée` };
                         continue;
                     }
 
@@ -435,20 +481,16 @@ const runSingleCommand = (
                 const [parent, name] = getParentAndName(targetPath, currentFs);
 
                 if (!parent || parent.type !== 'directory') {
-                    // It might be that the directory doesn't exist, check logic
                     return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Aucun fichier ou dossier de ce type` };
                 }
                 
-                // If checking permissions, we should check parent write permission here.
-                if (parent.permissions.includes('w-') || parent.permissions === 'drwxr-xr-x') {
-                     // Check specific 'w' logic if owner is not etudiant, etc. 
-                     // Simplified: if permissions string explicitly excludes w for user/others...
-                     if (parent.permissions.indexOf('w') === -1) {
+                // Permission Check
+                // 1. If file doesn't exist, we need Write on parent
+                if (!parent.children || !parent.children[name]) {
+                    if (!canWrite(parent)) {
                          return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Permission non accordée` };
-                     }
-                }
-
-                if (parent.children && !parent.children[name]) {
+                    }
+                    
                     parent.children[name] = {
                         type: 'file',
                         name: name,
@@ -456,6 +498,12 @@ const runSingleCommand = (
                         owner: 'etudiant',
                         content: ''
                     };
+                } else {
+                    // 2. If file exists, check write permission
+                    const existing = parent.children[name];
+                    if (!canWrite(existing)) {
+                         return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Permission non accordée` };
+                    }
                 }
             }
             setFs(currentFs);
@@ -485,20 +533,36 @@ const runSingleCommand = (
                  const srcNode = getNode(currentFs, srcPath);
                  if (!srcNode) return { id: uid(), type: 'error', content: `cp: impossible d'évaluer '${source}': Aucun fichier ou dossier de ce type` };
                  
+                 // Read permission on source needed
+                 // (Simulated - often requires 'r' bit)
+
                  if (srcNode.type === 'directory' && !recursive) {
                     return { id: uid(), type: 'error', content: `cp: -r non spécifié ; omission du répertoire '${source}'` };
                  }
 
                  // Copy logic
                  if (destNode && destNode.type === 'directory') {
+                     // Write permission on dest dir needed
+                     if (!canWrite(destNode)) {
+                         return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}/${srcNode.name}': Permission non accordée` };
+                     }
+
                      if (destNode.children) {
                          destNode.children[srcNode.name] = JSON.parse(JSON.stringify(srcNode));
+                         // Reset ownership to current user
+                         destNode.children[srcNode.name].owner = 'etudiant';
                      }
                  } else if (sources.length === 1 && destParent && destParent.type === 'directory') {
+                     // Write permission on dest parent needed
+                     if (!canWrite(destParent)) {
+                         return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Permission non accordée` };
+                     }
+
                      // Single file rename/copy
                      if (destParent.children) {
                         destParent.children[destName] = JSON.parse(JSON.stringify(srcNode));
                         destParent.children[destName].name = destName;
+                        destParent.children[destName].owner = 'etudiant';
                      }
                  } else {
                      return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Aucun fichier ou dossier de ce type` };
@@ -532,11 +596,24 @@ const runSingleCommand = (
                     return { id: uid(), type: 'error', content: `mv: impossible d'évaluer '${source}': Aucun fichier ou dossier de ce type` };
                 }
                 const srcNode = srcParent.children[srcName];
+                
+                // Write permission on source parent needed to remove it
+                if (!canWrite(srcParent)) {
+                    return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}': Permission non accordée (source)` };
+                }
 
                 if (destNode && destNode.type === 'directory' && destNode.children) {
+                    // Write permission on dest dir needed
+                    if (!canWrite(destNode)) {
+                        return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}': Permission non accordée (destination)` };
+                    }
                     destNode.children[srcNode.name] = srcNode;
                     delete srcParent.children[srcName];
                 } else if (sources.length === 1 && destParent && destParent.type === 'directory' && destParent.children) {
+                    // Write permission on dest parent needed
+                    if (!canWrite(destParent)) {
+                        return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}': Permission non accordée (destination)` };
+                    }
                     destParent.children[destName] = srcNode;
                     destParent.children[destName].name = destName;
                     delete srcParent.children[srcName];
@@ -564,6 +641,10 @@ const runSingleCommand = (
                      // Fallback manual glob logic just in case expansion didn't happen (quoted?)
                      const [parent, pattern] = getParentAndName(resolvePath(cwd, filename), currentFs);
                      if (parent && parent.children) {
+                         if (!canWrite(parent)) {
+                              if (!force) return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': Permission non accordée` };
+                              continue;
+                         }
                          const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
                          Object.keys(parent.children).forEach(k => {
                              if (regex.test(k)) delete parent.children![k];
@@ -580,6 +661,12 @@ const runSingleCommand = (
                     continue;
                 }
 
+                // Check permissions on Parent Directory (need write to remove child)
+                if (!canWrite(parent)) {
+                    if (!force) return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': Permission non accordée` };
+                    continue;
+                }
+
                 const target = parent.children[name];
                 if (target.type === 'directory' && !recursive) {
                     return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': est un dossier` };
@@ -593,38 +680,99 @@ const runSingleCommand = (
         }
 
         case 'chmod': {
-            const recursive = hasFlag(params, 'R');
-            const args = params.filter(p => !p.startsWith('-'));
-            if (args.length < 2) return { id: uid(), type: 'error', content: 'chmod: opérande manquant' };
-            const mode = args[0];
-            const files = args.slice(1);
+            // New logic to handle parsing correctly (especially for modes like -w and flags like -r)
+            const paramsCopy = [...params];
+            let recursive = false;
+            let mode = '';
+            let files = [];
             
-            const updatePerms = (node: FileSystemNode) => {
-                 let newPerms = node.permissions;
-                const typeChar = node.type === 'directory' ? 'd' : '-';
+            // 1. Extract Options
+            // We support -R (standard) and -r (requested alias for recursive)
+            const validFlags = ['-R', '-r', '--recursive'];
+            
+            const remainingParams = [];
+            for (const p of paramsCopy) {
+                if (validFlags.includes(p)) {
+                    recursive = true;
+                } else {
+                    remainingParams.push(p);
+                }
+            }
+            
+            if (remainingParams.length < 2) {
+                 if (remainingParams.length === 1) return { id: uid(), type: 'error', content: `chmod: opérande manquant après '${remainingParams[0]}'` };
+                 return { id: uid(), type: 'error', content: 'chmod: mode manquant' };
+            }
+
+            // First remaining is mode, rest are files
+            mode = remainingParams[0];
+            files = remainingParams.slice(1);
+            
+            const modifyPermString = (currentPerms: string, operationMode: string, type: 'file' | 'directory'): string => {
+                const typeChar = type === 'directory' ? 'd' : '-';
                 
-                // Simplified symbolic logic
-                if (mode === '777') newPerms = typeChar + 'rwxrwxrwx';
-                else if (mode === '755') newPerms = typeChar + 'rwxr-xr-x';
-                else if (mode === '555') newPerms = typeChar + 'r-xr-xr-x';
-                else if (mode === '644') newPerms = typeChar + 'rw-r--r--';
-                else if (mode === '600') newPerms = typeChar + 'rw-------';
-                else if (mode === '+x' || mode === 'u+x') {
-                    const arr = newPerms.split('');
-                    if (arr[3] === '-') arr[3] = 'x'; // user
-                    newPerms = arr.join('');
-                } else if (mode === 'u+w') {
-                     const arr = newPerms.split('');
-                    if (arr[2] === '-') arr[2] = 'w';
-                    newPerms = arr.join('');
-                } else if (mode === '-w') {
-                     newPerms = typeChar + 'r-xr-xr-x'; // Nuking write for sim simplicity
+                // Octal mode
+                if (/^[0-7]{3}$/.test(operationMode)) {
+                    const octalMap: Record<string, string> = {
+                        '0': '---', '1': '--x', '2': '-w-', '3': '-wx',
+                        '4': 'r--', '5': 'r-x', '6': 'rw-', '7': 'rwx'
+                    };
+                    const u = octalMap[operationMode[0]];
+                    const g = octalMap[operationMode[1]];
+                    const o = octalMap[operationMode[2]];
+                    return typeChar + u + g + o;
                 }
                 
-                node.permissions = newPerms;
+                // Symbolic mode (u+x, go-w, +x, -w)
+                // Split current perms into parts: [type, u, g, o]
+                let uArr = currentPerms.substring(1, 4).split('');
+                let gArr = currentPerms.substring(4, 7).split('');
+                let oArr = currentPerms.substring(7, 10).split('');
+                
+                // Regex to split: [who][op][perm] e.g. "u+x" or "+x" or "go-w" or "-w"
+                let match = operationMode.match(/^([ugoa]*)([\+\-])([rwx]+)$/);
+                
+                // Handle case like "-w" where first group matches "-" (incorrectly by simple regex sometimes)
+                // The regex ^([ugoa]*)([\+\-])([rwx]+)$ works for "-w":
+                // Group 1: "" (empty string, means all/whoever)
+                // Group 2: "-"
+                // Group 3: "w"
+                // So it works correctly.
 
+                if (match) {
+                    const who = match[1] || 'a'; // default all if empty
+                    const op = match[2];
+                    const perms = match[3];
+                    
+                    let targets: string[] = [];
+                    // 'a' implies u,g,o. BUT if umask matters... here we apply to all if 'a' or empty.
+                    if (who.includes('a') || who === '') targets = ['u', 'g', 'o'];
+                    else {
+                        if (who.includes('u')) targets.push('u');
+                        if (who.includes('g')) targets.push('g');
+                        if (who.includes('o')) targets.push('o');
+                    }
+                    
+                    const applyChange = (arr: string[]) => {
+                        if (perms.includes('r')) arr[0] = op === '+' ? 'r' : '-';
+                        if (perms.includes('w')) arr[1] = op === '+' ? 'w' : '-';
+                        if (perms.includes('x')) arr[2] = op === '+' ? 'x' : '-';
+                    };
+
+                    if (targets.includes('u')) applyChange(uArr);
+                    if (targets.includes('g')) applyChange(gArr);
+                    if (targets.includes('o')) applyChange(oArr);
+                    
+                    return typeChar + uArr.join('') + gArr.join('') + oArr.join('');
+                }
+
+                return currentPerms; // Fallback if parse fails
+            };
+
+            const updatePermsRecursively = (node: FileSystemNode) => {
+                node.permissions = modifyPermString(node.permissions, mode, node.type);
                 if (recursive && node.type === 'directory' && node.children) {
-                    Object.values(node.children).forEach(child => updatePerms(child));
+                    Object.values(node.children).forEach(child => updatePermsRecursively(child));
                 }
             };
 
@@ -633,7 +781,8 @@ const runSingleCommand = (
                 const node = getNode(currentFs, targetPath);
                 
                 if (!node) return { id: uid(), type: 'error', content: `chmod: impossible d'accéder à '${file}': Aucun fichier ou dossier de ce type` };
-                updatePerms(node);
+                
+                updatePermsRecursively(node);
             }
             
             setFs(currentFs);
@@ -1048,7 +1197,14 @@ export const executeCommand = (
           const [parent, name] = getParentAndName(targetPath, currentFs);
           
           if (parent && parent.children) {
+              if (!canWrite(parent)) {
+                   return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
+              }
               const existing = parent.children[name];
+              if (existing && !canWrite(existing)) {
+                   return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
+              }
+
               const contentToWrite = result.content;
               const newContent = (isAppend && existing?.content) ? existing.content + '\n' + contentToWrite : contentToWrite;
               

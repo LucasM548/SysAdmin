@@ -368,32 +368,32 @@ export const CHAPTERS: Chapter[] = [
         id: "ex5_3",
         question: "Enlevez le droit d'écriture sur `Secret` pour tout le monde (y compris vous).",
         hint: "chmod -w Secret (ou chmod 555 Secret)",
-        validationType: 'command_success',
-        validationValue: 'chmod -w Secret',
+        validationType: 'file_permissions',
+        validationValue: '/home/etudiant/Secret:dr-xr-xr-x',
         completed: false
       },
       {
         id: "ex5_4",
         question: "Essayez maintenant de créer un fichier dans `Secret` (Test d'interdiction).",
         hint: "touch Secret/test.txt (Cela devrait échouer !)",
-        validationType: 'command_success',
-        validationValue: 'touch Secret/test.txt',
+        validationType: 'output_match',
+        validationValue: 'Permission non accordée', // We now expect failure output
         completed: false
       },
       {
         id: "ex5_5",
         question: "Redonnez-vous le droit d'écriture sur `Secret`.",
         hint: "chmod u+w Secret (ou chmod 755 Secret)",
-        validationType: 'command_success',
-        validationValue: 'chmod u+w Secret',
+        validationType: 'file_permissions',
+        validationValue: '/home/etudiant/Secret:drwxr-xr-x',
         completed: false
       },
       {
         id: "ex5_6",
         question: "Utilisez l'option récursive pour donner tous les droits (777) à `Secret` et son contenu.",
         hint: "chmod -R 777 Secret",
-        validationType: 'command_success',
-        validationValue: 'chmod -R 777 Secret',
+        validationType: 'file_permissions',
+        validationValue: '/home/etudiant/Secret:drwxrwxrwx',
         completed: false
       }
     ]
@@ -436,8 +436,8 @@ export const CHAPTERS: Chapter[] = [
         id: "ex6_2",
         question: "Rendez le script `backup.sh` exécutable.",
         hint: "chmod +x backup.sh",
-        validationType: 'command_success',
-        validationValue: 'chmod +x backup.sh',
+        validationType: 'file_permissions',
+        validationValue: '/home/etudiant/backup.sh:-rwxr-xr-x',
         completed: false
       },
       {
