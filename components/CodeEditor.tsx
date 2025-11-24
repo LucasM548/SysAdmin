@@ -11,31 +11,49 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ fs, setFs, cwd, onRun }) => {
-  const [code, setCode] = useState('#!/bin/bash\n\n# Write your script here\n');
-  const [filename, setFilename] = useState('myscript.sh');
+  // Load initial state from localStorage if available
+  const [code, setCode] = useState(() => localStorage.getItem('editor_code') || '#!/bin/bash\n\n# Write your script here\n');
+  const [filename, setFilename] = useState(() => localStorage.getItem('editor_filename') || 'myscript.sh');
   const [saveStatus, setSaveStatus] = useState<'unsaved' | 'saved'>('unsaved');
 
   useEffect(() => {
       setSaveStatus('unsaved');
   }, [code, filename]);
 
+  // Persist code and filename whenever they change
+  useEffect(() => {
+      localStorage.setItem('editor_code', code);
+  }, [code]);
+
+  useEffect(() => {
+      localStorage.setItem('editor_filename', filename);
+  }, [filename]);
+
   const handleSave = () => {
     // Use saveFile helper to directly write content to FS
-    // Force executable permissions (-rwxr-xr-x) for scripts in the lab to avoid "Permission denied"
+    // We save as executable (-rwxr-xr-x) by default now, as requested.
     const success = saveFile(filename, code, cwd, fs, setFs, '-rwxr-xr-x');
     
     if (success) {
         setSaveStatus('saved');
+        return true;
     } else {
-        alert('Error saving file. Check filename and directory.');
+        alert('Error saving file. Check filename and directory permissions.');
+        return false;
     }
   };
 
   const handleRun = () => {
-    if (saveStatus === 'unsaved') {
-        handleSave();
+    // Always save before running
+    const saved = handleSave();
+    if (saved) {
+        onRun(`./${filename}`);
     }
-    onRun(`./${filename}`);
+  };
+
+  const handleClear = () => {
+      // No confirmation needed
+      setCode('#!/bin/bash\n\n');
   };
 
   return (
@@ -65,14 +83,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ fs, setFs, cwd, onRun }) => {
             
             <div className="flex gap-2 shrink-0">
                 <button 
-                    onClick={() => setCode('#!/bin/bash\n\n')}
+                    onClick={handleClear}
                     className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800 rounded transition-colors"
                     title="Effacer"
                 >
                     <Eraser size={16} />
                 </button>
                 <button 
-                    onClick={handleSave}
+                    onClick={() => handleSave()}
                     className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-colors text-xs font-bold"
                 >
                     <Save size={14} />

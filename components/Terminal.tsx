@@ -14,7 +14,7 @@ interface TerminalProps {
 }
 
 const Terminal: React.FC<TerminalProps> = ({ 
-  fs, setFs, history, setHistory, cwd, setCwd, onCommandExecuted 
+  fs, setFs, history, setHistory, cwd, setCwd, onCommandExecuted, externalCommand 
 }) => {
   const [input, setInput] = useState('');
   // Store just the command strings for Up/Down navigation
@@ -28,6 +28,38 @@ const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
+
+  // Handle external commands (e.g. from IDE Run button)
+  useEffect(() => {
+    if (externalCommand) {
+        const cmd = externalCommand.trim();
+        
+        // Add command to display history like a user typed it
+        const cmdEntry: TerminalOutput = { id: Date.now().toString(), type: 'command', content: cmd, cwd };
+        
+        // Execute
+        const result = executeCommand(cmd, cwd, fs, setFs);
+        
+        if (result.content === '__CLEAR__') {
+          setHistory([]);
+        } else {
+          // Add both command entry and result
+          const newHistory = [...history, cmdEntry];
+          if (result.content || result.type === 'error' || result.type === 'output') {
+              newHistory.push(result);
+          }
+          setHistory(newHistory);
+        }
+
+        if (result.cwd) {
+          setCwd(result.cwd);
+        }
+
+        if (onCommandExecuted) {
+          onCommandExecuted(cmd, result);
+        }
+    }
+  }, [externalCommand]);
 
   // Focus input on click
   const handleContainerClick = () => {
@@ -60,7 +92,7 @@ const Terminal: React.FC<TerminalProps> = ({
         setHistory([]);
       } else {
         const newHistory = [...history, cmdEntry];
-        if (result.content || result.type === 'error') {
+        if (result.content || result.type === 'error' || result.type === 'output') {
             newHistory.push(result);
         }
         setHistory(newHistory);

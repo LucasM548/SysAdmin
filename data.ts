@@ -433,14 +433,6 @@ export const CHAPTERS: Chapter[] = [
         completed: false
       },
       {
-        id: "ex6_2",
-        question: "Rendez le script `backup.sh` exécutable.",
-        hint: "chmod +x backup.sh",
-        validationType: 'file_permissions',
-        validationValue: '/home/etudiant/backup.sh:-rwxr-xr-x',
-        completed: false
-      },
-      {
         id: "ex6_3",
         question: "Exécutez le script pour créer le dossier.",
         hint: "./backup.sh",
