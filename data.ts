@@ -407,53 +407,222 @@ export const CHAPTERS: Chapter[] = [
       {
         title: "Structure d'un script",
         content: [
-          "1ère ligne : `#!/bin/bash` (Shebang).",
+          "1ère ligne : `#!/bin/bash` (Shebang - indique l'interpréteur).",
           "Rendre exécutable : `chmod +x script.sh`.",
-          "Exécuter : `./script.sh`."
+          "Exécuter : `./script.sh` ou `bash script.sh`.",
+          "Un script = automatisation de commandes."
         ],
         code: "#!/bin/bash\necho \"Mon premier script\""
       },
       {
-        title: "Variables & Boucles",
+        title: "Variables & FOR",
         content: [
-          "`NOM='Toto'` (pas d'espaces autour du =).",
-          "`echo $NOM` pour utiliser.",
-          "`for i in 1 2 3; do ... done` pour boucler."
+          "`VAR='valeur'` : Définir (AUCUN espace autour du =).",
+          "`echo $VAR` ou `${VAR}` : Utiliser.",
+          "`for VAR in LISTE; do CMD; done` : Boucle.",
+          "Listes : `1 2 3`, `$(seq 1 10)`, `*.txt`"
         ],
-        code: "for fichier in *.txt; do\n  echo \"Trouvé : $fichier\"\ndone"
+        code: "for i in 1 2 3; do\n  echo \"Nombre: $i\"\ndone"
+      },
+      {
+        title: "Paramètres",
+        content: [
+          "`$0` : Nom du script.",
+          "`$1, $2, $3...` : Arguments 1, 2, 3.",
+          "`$#` : Nombre d'arguments.",
+          "`$?` : Code retour (0=succès).",
+          "`exit N` : Quitter avec code N."
+        ],
+        code: "if [ $# -ne 1 ]; then\n  echo \"Usage: $0 arg\"\n  exit 1\nfi"
+      },
+      {
+        title: "IF & Tests [ ]",
+        content: [
+          "`if [ COND ]; then CMD; fi`",
+          "`if [ C ]; then CMD1; else CMD2; fi`",
+          "Numériques : `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`",
+          "Chaînes : `=`, `!=`, `-z` (vide), `-n` (non-vide)",
+          "Fichiers : `-f` (existe), `-d` (dossier)"
+        ],
+        code: "if [ $# -eq 0 ]; then\n  echo \"Aucun arg\"\nfi"
+      },
+      {
+        title: "Tests [[ ]] & Regex",
+        content: [
+          "`[[ CONDITION ]]` : Version avancée.",
+          "`[[ $var =~ REGEX ]]` : Test regex.",
+          "Exemple: `[[ $1 =~ ^[0-9]+$ ]]` pour nombre.",
+          "`&&` (ET), `||` (OU) utilisables dedans."
+        ],
+        code: "if [[ $1 =~ ^[0-9]+$ ]]; then\n  echo \"Nombre\"\nfi"
+      },
+      {
+        title: "WHILE",
+        content: [
+          "`while [ COND ]; do CMD; done`",
+          "`while true; do ... done` : Infinie.",
+          "`break` : Sortir. `continue` : Suivant.",
+          "Utile pour surveillance, répétitions."
+        ],
+        code: "i=0\nwhile [ $i -lt 5 ]; do\n  echo $i\n  i=$((i+1))\ndone"
+      },
+      {
+        title: "FOR Arithmétique",
+        content: [
+          "`for ((INIT; COND; INCR)); do CMD; done`",
+          "Exemple: `for ((i=0; i<10; i++))`",
+          "Opérateurs: `++`, `--`, `+=`, `-=`",
+          "Style C, très utile pour compteurs."
+        ],
+        code: "for ((i=1; i<=5; i++)); do\n  echo $i\ndone"
+      },
+      {
+        title: "Arithmétique",
+        content: [
+          "`$((EXPR))` : Évalue expression.",
+          "Exemples: `sum=$((a+b))`, `n=$((n*2))`",
+          "Opérateurs: `+`, `-`, `*`, `/`, `%`, `**`",
+          "`((VAR++))` équivaut à `VAR=$((VAR+1))`"
+        ],
+        code: "n=5\nfact=1\nfor ((i=1; i<=n; i++)); do\n  fact=$((fact*i))\ndone"
+      },
+      {
+        title: "CASE",
+        content: [
+          "`case $VAR in PAT) CMD ;; esac`",
+          "Patterns: `val)`, `v1|v2)` (OU), `*)` (défaut)",
+          "Terminer par `;;`",
+          "Utile: menus, validation multi-choix."
+        ],
+        code: "case $1 in\n  start) echo \"GO\" ;;\n  *) echo \"?\" ;;\nesac"
+      },
+      {
+        title: "READ (Lecture)",
+        content: [
+          "`read VAR` : Lit entrée dans VAR.",
+          "`read -p \"Prompt: \" VAR` : Avec prompt.",
+          "`read -s VAR` : Silencieux (mot de passe).",
+          "Scripts interactifs, confirmations."
+        ],
+        code: "read -p \"Nom: \" nom\necho \"Bonjour $nom\""
+      },
+      {
+        title: "Outils Texte",
+        content: [
+          "`grep -w MOT` : Mot entier.",
+          "`awk '{print $1}'` : Colonne 1.",
+          "`cut -d':' -f2` : Champ 2.",
+          "`tr -s ' '` : Compresse espaces.",
+          "`sort -n` : Tri numérique."
+        ],
+        code: "grep pattern file | cut -d':' -f2"
+      },
+      {
+        title: "Redirections",
+        content: [
+          "`CMD &> /dev/null` : Ignore tout.",
+          "`CMD 2>&1` : stderr vers stdout.",
+          "`CMD; if [ $? -eq 0 ]` : Test retour.",
+          "`|| true` : Ignore erreurs."
+        ],
+        code: "grep x f &> /dev/null\nif [ $? -eq 0 ]; then\n  echo \"OK\"\nfi"
       }
     ],
     exercises: [
       {
         id: "ex6_1",
-        question: "Dans le 'Labo Script', créez `backup.sh`. Définissez `DIR='Sauvegarde'` et faites `mkdir -p $DIR`.",
-        hint: "DIR='Sauvegarde'\nmkdir -p $DIR",
+        question: "Créez un script `hello.sh` qui affiche 'Bonjour!' à l'écran. N'oubliez pas le shebang en première ligne.",
+        hint: "#!/bin/bash\necho 'Bonjour!'",
         validationType: 'file_content',
-        validationValue: '/home/etudiant/backup.sh:mkdir -p $DIR',
+        validationValue: '/home/etudiant/hello.sh:#!/bin/bash',
+        completed: false
+      },
+      {
+        id: "ex6_2",
+        question: "Créez `variables.sh` qui définit une variable NOM avec la valeur 'Linux' et affiche 'Salut' suivi de cette variable.",
+        hint: "#!/bin/bash\nNOM='Linux'\necho \"Salut $NOM\"",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/variables.sh:NOM=',
         completed: false
       },
       {
         id: "ex6_3",
-        question: "Exécutez le script pour créer le dossier.",
-        hint: "./backup.sh",
-        validationType: 'dir_exists',
-        validationValue: '/home/etudiant/Sauvegarde',
+        question: "Créez `loop.sh` qui utilise une boucle for pour afficher les nombres de 1 à 5 (un par ligne).",
+        hint: "#!/bin/bash\nfor i in 1 2 3 4 5; do\n  echo $i\ndone",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/loop.sh:for i in',
         completed: false
       },
       {
         id: "ex6_4",
-        question: "Créez un script `count.sh` qui boucle de 1 à 5 et affiche le chiffre.",
-        hint: "for i in 1 2 3 4 5; do echo $i; done",
+        question: "Créez `check_arg.sh` qui vérifie que exactement un argument est passé. Si ce n'est pas le cas, affichez un message d'usage et quittez avec exit 1.",
+        hint: "#!/bin/bash\nif [ $# -ne 1 ]; then\n  echo \"Usage: $0 arg\"\n  exit 1\nfi\necho \"Arg: $1\"",
         validationType: 'file_content',
-        validationValue: '/home/etudiant/count.sh:for',
+        validationValue: '/home/etudiant/check_arg.sh:$# -ne 1',
         completed: false
       },
       {
         id: "ex6_5",
-        question: "Exécutez `count.sh` et vérifiez la sortie.",
-        hint: "./count.sh",
-        validationType: 'command_success',
-        validationValue: './count.sh',
+        question: "Créez `test_num.sh` qui teste si le premier argument est un nombre entier. Utilisez une regex pour vérifier. Affichez 'Nombre' ou 'Pas nombre'.",
+        hint: "#!/bin/bash\nif [[ $1 =~ ^[0-9]+$ ]]; then\n  echo \"Nombre\"\nelse\n  echo \"Pas nombre\"\nfi",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/test_num.sh:=~ ^[0-9]+$',
+        completed: false
+      },
+      {
+        id: "ex6_6",
+        question: "Créez `while_count.sh` qui utilise une boucle while pour compter de 0 à 4. Initialisez i à 0 et incrémentez avec une expression arithmétique.",
+        hint: "#!/bin/bash\ni=0\nwhile [ $i -lt 5 ]; do\n  echo $i\n  i=$((i+1))\ndone",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/while_count.sh:while [',
+        completed: false
+      },
+      {
+        id: "ex6_7",
+        question: "Créez `for_arith.sh` qui utilise une boucle for arithmétique (style C) pour afficher les nombres de 1 à 10.",
+        hint: "#!/bin/bash\nfor ((i=1; i<=10; i++)); do\n  echo $i\ndone",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/for_arith.sh:for ((',
+        completed: false
+      },
+      {
+        id: "ex6_8",
+        question: "Créez `facto.sh` qui calcule la factorielle du premier argument. Utilisez une boucle for arithmétique et une multiplication avec $((...)). Affichez le résultat au format 'N! = résultat'.",
+        hint: "#!/bin/bash\nn=$1\nfact=1\nfor ((i=1; i<=n; i++)); do\n  fact=$((fact*i))\ndone\necho \"$n! = $fact\"",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/facto.sh:fact=$((fact',
+        completed: false
+      },
+      {
+        id: "ex6_9",
+        question: "Créez `menu.sh` qui utilise une structure case pour gérer 3 cas : 'start' affiche GO, 'stop' affiche STOP, et tout autre cas affiche un point d'interrogation.",
+        hint: "#!/bin/bash\ncase $1 in\n  start) echo \"GO\" ;;\n  stop) echo \"STOP\" ;;\n  *) echo \"?\" ;;\nesac",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/menu.sh:case $1 in',
+        completed: false
+      },
+      {
+        id: "ex6_10",
+        question: "Créez `ask.sh` qui demande le nom de l'utilisateur avec un prompt 'Nom: ', puis affiche 'Bonjour' suivi du nom saisi.",
+        hint: "#!/bin/bash\nread -p \"Nom: \" nom\necho \"Bonjour $nom!\"",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/ask.sh:read -p',
+        completed: false
+      },
+      {
+        id: "ex6_11",
+        question: "Créez `sum.sh` qui demande deux nombres à l'utilisateur (avec read), calcule leur somme avec une expression arithmétique, et affiche le résultat.",
+        hint: "#!/bin/bash\nread -p \"a: \" a\nread -p \"b: \" b\nsum=$((a+b))\necho \"$sum\"",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/sum.sh:sum=$((a+b))',
+        completed: false
+      },
+      {
+        id: "ex6_12",
+        question: "Créez `check_file.sh` qui teste si le fichier passé en argument existe. Affichez 'Existe' si le fichier existe, 'Non' sinon.",
+        hint: "#!/bin/bash\nif [ -f \"$1\" ]; then\n  echo \"Existe\"\nelse\n  echo \"Non\"\nfi",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/check_file.sh:-f',
         completed: false
       }
     ]
