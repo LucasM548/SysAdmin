@@ -107,6 +107,11 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
         if (getNode(fs, ex.validationValue)) {
           onCompleteExercise(ex.id);
         }
+      } else if (ex.validationType === 'file_missing') {
+        // Validation check for file deletion
+        if (!getNode(fs, ex.validationValue)) {
+          onCompleteExercise(ex.id);
+        }
       } else if (ex.validationType === 'cwd_check') {
         if (cwd === ex.validationValue) {
           onCompleteExercise(ex.id);
@@ -202,8 +207,8 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
             {chapter.id === 'chap5' ? 'VISUEL/CALCULATEUR' : 'VISUEL'}
           </button>
 
-          {/* Specialized IDE Tab for Chapter 6 */}
-          {chapter.id === 'chap6' && (
+          {/* Specialized IDE Tab for Chapter 6 AND 8 */}
+          {(chapter.id === 'chap6' || chapter.id === 'chap8') && (
             <button
               onClick={() => setActiveTab('IDE')}
               className={`px-4 md:px-6 py-3 text-xs font-bold flex items-center justify-center gap-2 border-t-2 transition-colors whitespace-nowrap ${activeTab === 'IDE'

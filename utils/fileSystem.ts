@@ -215,7 +215,7 @@ const hasFlag = (params: string[], flagChar: string): boolean => {
 
 // Helper: Expand Glob Pattern
 const expandGlob = (arg: string, cwd: string, root: FileSystemNode): string[] => {
-    if (!arg.includes('*')) return [arg];
+    if (!arg.includes('*') && !arg.includes('?')) return [arg];
     
     const fullPathWithPattern = resolvePath(cwd, arg);
     const lastSlash = fullPathWithPattern.lastIndexOf('/');
@@ -227,7 +227,7 @@ const expandGlob = (arg: string, cwd: string, root: FileSystemNode): string[] =>
         return [arg]; 
     }
     
-    const regex = new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`);
+    const regex = new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.')}$`);
     const matches = Object.keys(dirNode.children).filter(name => regex.test(name));
     
     if (matches.length === 0) return [arg];
@@ -733,14 +733,14 @@ const runSingleCommand = (
             if (files.length === 0 && !force) return { id: uid(), type: 'error', content: 'rm: opérande manquant' };
 
             for (const filename of files) {
-                if (filename.includes('*')) {
+                if (filename.includes('*') || filename.includes('?')) {
                      const [parent, pattern] = getParentAndName(resolvePath(cwd, filename), currentFs);
                      if (parent && parent.children) {
                          if (!canWrite(parent)) {
                               if (!force) return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': Permission non accordée` };
                               continue;
                          }
-                         const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
+                         const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
                          Object.keys(parent.children).forEach(k => {
                              if (regex.test(k)) delete parent.children![k];
                          });
@@ -1090,7 +1090,7 @@ export const executeCommand = (
           const raw = argsRaw[idx + 1]; 
           if ((raw.startsWith('"') || raw.startsWith("'")) && !raw.includes('*')) {
               expandedParams.push(clean);
-          } else if (clean.includes('*') && !(raw.startsWith('"') || raw.startsWith("'"))) {
+          } else if ((clean.includes('*') || clean.includes('?')) && !(raw.startsWith('"') || raw.startsWith("'"))) {
               expandedParams.push(...expandGlob(clean, cwd, currentFs));
           } else {
               expandedParams.push(clean);
