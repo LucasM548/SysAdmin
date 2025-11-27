@@ -7,7 +7,7 @@ const getChapter1FS = (): FileSystemNode => JSON.parse(JSON.stringify(DEFAULT_FS
 // Chapter 8 specific FS: Includes regex word lists and permission scenarios
 const getChapter8FS = (): FileSystemNode => {
   const fs = JSON.parse(JSON.stringify(DEFAULT_FS));
-  
+
   // Setup for Regex exercises (dico.txt based on DS Part 2)
   fs.children['home'].children['etudiant'].children['dico.txt'] = {
     type: 'file',
@@ -15,8 +15,8 @@ const getChapter8FS = (): FileSystemNode => {
     permissions: '-rw-r--r--',
     owner: 'etudiant',
     content: [
-      'table', 'tache', 'tg', 'th', 'tc', 'tcaaaaabz', 'tchoupy', 
-      'td1234ba', 'teaaaaayk', 'tfzzzztz', 'tg1234bk', 'tata', 
+      'table', 'tache', 'tg', 'th', 'tc', 'tcaaaaabz', 'tchoupy',
+      'td1234ba', 'teaaaaayk', 'tfzzzztz', 'tg1234bk', 'tata',
       'abc', 'fin', 'tcaaaabk' // 'tcaaaabk' matches pattern ^t[c-h].{4}[by][^c-h]$
     ].join('\n')
   };
@@ -40,18 +40,18 @@ const getChapter8FS = (): FileSystemNode => {
 
   // Setup for Globbing exercises (DS Part 1)
   fs.children['home'].children['etudiant'].children['Glob'] = {
-      type: 'directory',
-      name: 'Glob',
-      permissions: 'drwxr-xr-x',
-      owner: 'etudiant',
-      children: {
-          'a': { type: 'file', name: 'a', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
-          'aa': { type: 'file', name: 'aa', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
-          'aaa': { type: 'file', name: 'aaa', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
-          'ab': { type: 'file', name: 'ab', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
-          'ac': { type: 'file', name: 'ac', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
-          'ba': { type: 'file', name: 'ba', permissions: '-rw-r--r--', owner: 'etudiant', content: '' }
-      }
+    type: 'directory',
+    name: 'Glob',
+    permissions: 'drwxr-xr-x',
+    owner: 'etudiant',
+    children: {
+      'a': { type: 'file', name: 'a', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
+      'aa': { type: 'file', name: 'aa', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
+      'aaa': { type: 'file', name: 'aaa', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
+      'ab': { type: 'file', name: 'ab', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
+      'ac': { type: 'file', name: 'ac', permissions: '-rw-r--r--', owner: 'etudiant', content: '' },
+      'ba': { type: 'file', name: 'ba', permissions: '-rw-r--r--', owner: 'etudiant', content: '' }
+    }
   };
 
   return fs;
@@ -736,87 +736,87 @@ export const CHAPTERS: Chapter[] = [
     description: "Révision intensive basée sur les annales : Regex complexes, Globbing, Scripting avancé et Permissions.",
     initialFileSystem: getChapter8FS(),
     lessons: [
-        {
-            title: "Globbing Avancé (Partie 1)",
-            content: [
-                "`*` : Remplace n'importe quelle suite de caractères.",
-                "`?` : Remplace **exactement un** caractère.",
-                "Attention avec `echo` : le shell remplace les jokers *avant* d'exécuter la commande. `echo ls *` affiche littéralement 'ls' suivi des fichiers.",
-                "Exercice : `echo ??` affiche tous les fichiers de exactement 2 lettres."
-            ],
-            code: "ls ??\necho *[0-9]*"
-        },
-        {
-            title: "Expressions Régulières (Partie 2)",
-            content: [
-                "Utilisées avec `grep -E` (Extended).",
-                "`^` (début de ligne), `$` (fin de ligne), `.` (n'importe quel caractère).",
-                "`[abc]` (a, b ou c), `[^abc]` (tout sauf a, b, c).",
-                "`{n}` (exactement n fois).",
-                "Exemple DS : `^t[c-h].{4}[by][^c-h]$` (Commence par t, 2e lettre c-h, 4 chars, avant-dernier b/y, dernier sauf c-h)."
-            ],
-            code: "grep -E \"^t[c-h]\" fichier"
-        },
-        {
-            title: "Scripting : Shift & Args (Partie 4)",
-            content: [
-                "`$#` : Nombre d'arguments passés au script.",
-                "`shift` : Décale les arguments vers la gauche ($2 devient $1). Indispensable pour traiter une liste indéfinie d'arguments.",
-                "`exit 1` : Quitte le script avec un code d'erreur.",
-                "Structure type : Vérification `$#`, initialisation, boucle `for` ou `while` avec `shift`."
-            ],
-            code: "while [ $# -gt 0 ]; do\n  echo \"Traitement: $1\"\n  shift\ndone"
-        },
-        {
-            title: "Permissions : Piège de la Suppression (Partie 5)",
-            content: [
-                "Règle d'or : Pour SUPPRIMER un fichier, il faut avoir le droit d'écriture (`w`) sur le **DOSSIER PARENT**.",
-                "Les droits sur le fichier lui-même (même `r--`) n'empêchent pas sa suppression si on contrôle le dossier.",
-                "Inversement, si le dossier est en lecture seule (`r-x`), impossible de supprimer un fichier dedans, même si on est propriétaire."
-            ]
-        }
+      {
+        title: "Globbing Avancé (Partie 1)",
+        content: [
+          "`*` : Remplace n'importe quelle suite de caractères.",
+          "`?` : Remplace **exactement un** caractère.",
+          "Attention avec `echo` : le shell remplace les jokers *avant* d'exécuter la commande. `echo ls *` affiche littéralement 'ls' suivi des fichiers.",
+          "Exercice : `echo ??` affiche tous les fichiers de exactement 2 lettres."
+        ],
+        code: "ls ??\necho *[0-9]*"
+      },
+      {
+        title: "Expressions Régulières (Partie 2)",
+        content: [
+          "Utilisées avec `grep -E` (Extended).",
+          "`^` (début de ligne), `$` (fin de ligne), `.` (n'importe quel caractère).",
+          "`[abc]` (a, b ou c), `[^abc]` (tout sauf a, b, c).",
+          "`{n}` (exactement n fois).",
+          "Exemple DS : `^t[c-h].{4}[by][^c-h]$` (Commence par t, 2e lettre c-h, 4 chars, avant-dernier b/y, dernier sauf c-h)."
+        ],
+        code: "grep -E \"^t[c-h]\" fichier"
+      },
+      {
+        title: "Scripting : Shift & Args (Partie 4)",
+        content: [
+          "`$#` : Nombre d'arguments passés au script.",
+          "`shift` : Décale les arguments vers la gauche ($2 devient $1). Indispensable pour traiter une liste indéfinie d'arguments.",
+          "`exit 1` : Quitte le script avec un code d'erreur.",
+          "Structure type : Vérification `$#`, initialisation, boucle `for` ou `while` avec `shift`."
+        ],
+        code: "while [ $# -gt 0 ]; do\n  echo \"Traitement: $1\"\n  shift\ndone"
+      },
+      {
+        title: "Permissions : Piège de la Suppression (Partie 5)",
+        content: [
+          "Règle d'or : Pour SUPPRIMER un fichier, il faut avoir le droit d'écriture (`w`) sur le **DOSSIER PARENT**.",
+          "Les droits sur le fichier lui-même (même `r--`) n'empêchent pas sa suppression si on contrôle le dossier.",
+          "Inversement, si le dossier est en lecture seule (`r-x`), impossible de supprimer un fichier dedans, même si on est propriétaire."
+        ]
+      }
     ],
     exercises: [
-        {
-            id: "ex8_1",
-            question: "Listez les fichiers du dossier `Glob` qui ont exactement 2 caractères.",
-            hint: "Vous pouvez aller dans le dossier (`cd Glob`) puis faire `ls ??` ou utiliser un chemin relatif (`ls Glob/??`).",
-            validationType: 'output_match',
-            validationValue: 'aa', // Matches one of the expected files (aa, ab, ac...)
-            completed: false
-        },
-        {
-            id: "ex8_2",
-            question: "Dans `dico.txt`, utilisez grep pour trouver le mot qui correspond au motif du DS : commence par t, 2e lettre entre c et h, suivi de 4 caractères, avant-dernier b ou y, dernier caractère PAS entre c et h.",
-            hint: "grep -E \"^t[c-h].{4}[by][^c-h]$\" dico.txt",
-            validationType: 'output_match',
-            validationValue: 'tcaaaabk',
-            completed: false
-        },
-        {
-            id: "ex8_3",
-            question: "Créez le script `somprod.sh` (Partie 4 du DS). Il doit vérifier qu'il y a au moins 3 arguments (`$#`). Si ce n'est pas le cas, affichez une erreur et quittez. (Utilisez l'onglet LABO).",
-            hint: "#!/bin/bash\nif [ $# -lt 3 ]; then\n  echo \"Usage: somprod.sh op arg1 arg2...\"\n  exit 1\nfi",
-            validationType: 'file_content',
-            validationValue: '/home/etudiant/somprod.sh:$# -lt 3',
-            completed: false
-        },
-        {
-            id: "ex8_4",
-            question: "Allez dans le dossier `Exam`. Tentez de supprimer le fichier `sujet.pdf`. Cela doit échouer car le dossier est protégé en écriture.",
-            hint: "cd Exam; rm sujet.pdf",
-            validationType: 'output_match',
-            validationValue: 'Permission non accordée',
-            completed: false
-        },
-        {
-            id: "ex8_5",
-            question: "Corrigez les droits du dossier `Exam` pour vous donner le droit d'écriture (u+w), puis supprimez le fichier `sujet.pdf`.",
-            hint: "chmod u+w .; rm sujet.pdf",
-            validationType: 'file_missing',
-            validationValue: '/home/etudiant/Exam/sujet.pdf',
-            completed: false
-        }
+      {
+        id: "ex8_1",
+        question: "Listez les fichiers du dossier `Glob` qui ont exactement 2 caractères.",
+        hint: "Vous pouvez aller dans le dossier (`cd Glob`) puis faire `ls ??` ou utiliser un chemin relatif (`ls Glob/??`).",
+        validationType: 'output_match',
+        validationValue: 'aa', // Matches one of the expected files (aa, ab, ac...)
+        completed: false
+      },
+      {
+        id: "ex8_2",
+        question: "Dans `dico.txt`, utilisez grep pour trouver le mot qui correspond au motif du DS : commence par t, 2e lettre entre c et h, suivi de 4 caractères, avant-dernier b ou y, dernier caractère PAS entre c et h.",
+        hint: "grep -E \"^t[c-h].{4}[by][^c-h]$\" dico.txt",
+        validationType: 'output_match',
+        validationValue: 'tcaaaabk',
+        completed: false
+      },
+      {
+        id: "ex8_3",
+        question: "Créez le script `somprod.sh`. Il doit vérifier qu'il y a au moins 3 arguments (`$#`). Si ce n'est pas le cas, affichez une erreur et quittez. (Utilisez l'onglet LABO).",
+        hint: "#!/bin/bash\nif [ $# -lt 3 ]; then\n  echo \"Usage: somprod.sh op arg1 arg2...\"\n  exit 1\nfi",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/somprod.sh:$# -lt 3',
+        completed: false
+      },
+      {
+        id: "ex8_4",
+        question: "Allez dans le dossier `Exam`. Tentez de supprimer le fichier `sujet.pdf`. Cela doit échouer car le dossier est protégé en écriture.",
+        hint: "cd Exam; rm sujet.pdf",
+        validationType: 'output_match',
+        validationValue: 'Permission non accordée',
+        completed: false
+      },
+      {
+        id: "ex8_5",
+        question: "Corrigez les droits du dossier `Exam` pour vous donner le droit d'écriture, puis supprimez le fichier `sujet.pdf`.",
+        hint: "chmod u+w .; rm sujet.pdf",
+        validationType: 'file_missing',
+        validationValue: '/home/etudiant/Exam/sujet.pdf',
+        completed: false
+      }
     ]
   }
 ];
