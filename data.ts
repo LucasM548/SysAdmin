@@ -701,7 +701,7 @@ export const CHAPTERS: Chapter[] = [
         code: "ls ??\necho *[0-9]*"
       },
       {
-        title: "Subtilité du Expressions Régulières Étendues (ERE)",
+        title: "Subtilité de l'Expressions Régulières Étendues (ERE)",
         content: [
           "`.` : Remplace n'importe quel caractère.",
           "`?` : Rend l'élément qui le précède optionnel"
