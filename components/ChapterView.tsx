@@ -62,6 +62,15 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
   const [fs, setFs] = useState<FileSystemNode>(chapter.initialFileSystem);
   const [history, setHistory] = useState<TerminalOutput[]>([]);
   const [cwd, setCwd] = useState<string>('/home/etudiant');
+  const [externalCommand, setExternalCommand] = useState<string | null>(null);
+
+  // Ref to store the last executed command context for validation
+  const lastCommandRef = React.useRef<{ cmd: string, output: TerminalOutput | null }>({ cmd: '', output: null });
+
+  // Calc progress for current chapter
+  const currentChapterCompleted = chapter.exercises.filter(ex => completedExercises.has(ex.id)).length;
+  const currentChapterTotal = chapter.exercises.length;
+  const progressPercent = currentChapterTotal === 0 ? 0 : (currentChapterCompleted / currentChapterTotal) * 100;
 
   // Reset state when chapter changes (except completion which is passed as prop)
   useEffect(() => {
@@ -70,7 +79,167 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
     setCwd('/home/etudiant');
     setActiveTab('COURSE');
     setMobileView('CONTENT');
+    lastCommandRef.current = { cmd: '', output: null };
   }, [chapter.id]);
+
+  // Clear external command after processing
+  useEffect(() => {
+    if (externalCommand) {
+      const timer = setTimeout(() => setExternalCommand(null), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [externalCommand]);
+
+  const checkExerciseCompletion = (ex: Exercise, cmd: string = '', output: TerminalOutput | null = null) => {
+    // Split by || to support multiple valid scenarios (OR logic)
+    const scenarios = ex.validationValue.split('||');
+
+    // Check if ANY scenario is valid
+    const isComplete = scenarios.some(scenario => {
+      const parts = scenario.split('|');
+      // Store values as arrays to support multiple checks of same type (e.g. multiple files)
+      const checks: Record<string, string[]> = {};
+
+      // Parse validation format: "cmd:value|file:value|output:value"
+      parts.forEach(part => {
+        const firstColon = part.indexOf(':');
+        if (firstColon !== -1) {
+          const key = part.substring(0, firstColon);
+          const value = part.substring(firstColon + 1);
+          if (!checks[key]) {
+            checks[key] = [];
+          }
+          checks[key].push(value);
+        }
+      });
+
+      // 1. Check command keyword if specified (Simple includes)
+      if (checks.cmd) {
+        for (const cmdCheck of checks.cmd) {
+          if (!cmd.toLowerCase().includes(cmdCheck.toLowerCase())) return false;
+        }
+      }
+
+      // 2. Check exact command if specified
+      if (checks.exactCmd) {
+        for (const exactCmdCheck of checks.exactCmd) {
+          if (cmd.trim() !== exactCmdCheck) return false;
+        }
+      }
+
+      // 3. Check Regex command if specified
+      if (checks.regexCmd) {
+        for (const regexCmdCheck of checks.regexCmd) {
+          try {
+            const regex = new RegExp(regexCmdCheck);
+            if (!regex.test(cmd.trim())) return false;
+          } catch (e) {
+            console.error("Invalid regex in exercise validation:", regexCmdCheck);
+            return false;
+          }
+        }
+      }
+
+      // 4. Check output if specified
+      if (checks.output) {
+        for (const outputCheck of checks.output) {
+          // FIXED: Allow validation even if output type is 'error', as long as content matches
+          if (!output || !output.content.includes(outputCheck)) {
+            return false;
+          }
+        }
+      }
+
+      // 5. Check file existence/properties if specified
+      const fileChecks = [...(checks.file || []), ...(checks.dir || [])];
+      for (const pathToCheck of fileChecks) {
+        // Handle relative paths in validation by resolving against CWD if needed, 
+        // but usually validation paths are absolute for reliability.
+        // If it starts with /, it's absolute.
+        const resolvedPath = pathToCheck.startsWith('/') ? pathToCheck : resolvePath(cwd, pathToCheck);
+
+        const node = getNode(fs, resolvedPath);
+        if (!node) return false;
+
+        // Check type if specified explicitly OR implied by key (file vs dir)
+        // If it came from 'dir' key, it MUST be a directory
+        if (checks.dir && checks.dir.includes(pathToCheck)) {
+          if (node.type !== 'directory') return false;
+        }
+        // If it came from 'file' key, it MUST be a file
+        if (checks.file && checks.file.includes(pathToCheck)) {
+          if (node.type !== 'file') return false;
+        }
+
+        // Check content if specified
+        if (checks.content) {
+          for (const contentCheck of checks.content) {
+            if (node.type !== 'file' || !node.content) return false;
+
+            // Support regex content check if value starts with regex:
+            if (contentCheck.startsWith('regex:')) {
+              try {
+                const regexStr = contentCheck.substring(6);
+                const regex = new RegExp(regexStr);
+                if (!regex.test(node.content)) return false;
+              } catch (e) {
+                // Fallback to normal include if regex fails
+                if (!node.content.includes(contentCheck)) return false;
+              }
+            } else {
+              if (!node.content.includes(contentCheck)) return false;
+            }
+          }
+        }
+
+        // Check permissions if specified
+        if (checks.perms) {
+          for (const permsCheck of checks.perms) {
+            if (node.permissions !== permsCheck) return false;
+          }
+        }
+      }
+
+      // 6. Check file is missing if specified
+      if (checks.missing) {
+        for (const missingCheck of checks.missing) {
+          if (getNode(fs, missingCheck)) return false;
+        }
+      }
+
+      // 7. Check current directory if specified
+      if (checks.cwd) {
+        for (const cwdCheck of checks.cwd) {
+          // Allow checking if we are INSIDE a dir (startsWith) or exact match
+          if (cwdCheck.endsWith('*')) {
+            const baseCwd = cwdCheck.slice(0, -1);
+            if (!cwd.startsWith(baseCwd)) return false;
+          } else {
+            if (cwd !== cwdCheck) return false;
+          }
+        }
+      }
+
+      // All checks in this scenario passed
+      return true;
+    });
+
+    if (isComplete) {
+      onCompleteExercise(ex.id);
+    }
+  };
+
+  const handleCommandExecuted = (cmd: string, output: TerminalOutput) => {
+    // Update ref with latest command context
+    lastCommandRef.current = { cmd, output };
+
+    // Find the first uncompleted exercise
+    const firstUncompleted = chapter.exercises.find(ex => !completedExercises.has(ex.id));
+
+    if (firstUncompleted) {
+      checkExerciseCompletion(firstUncompleted, cmd, output);
+    }
+  };
 
   // Execute command from Editor
   const handleEditorRun = (cmd: string) => {
@@ -82,90 +251,16 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
     }
   };
 
-  const [externalCommand, setExternalCommand] = useState<string | null>(null);
-
-  // Clear external command after processing
-  useEffect(() => {
-    if (externalCommand) {
-      const timer = setTimeout(() => setExternalCommand(null), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [externalCommand]);
-
-
-  const checkExerciseCompletion = (ex: Exercise, cmd: string = '', output: TerminalOutput | null = null) => {
-    if (ex.validationType === 'command_success') {
-      if (cmd.trim() === ex.validationValue && output && output.type !== 'error') {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'output_match') {
-      // Allow checking both success content and error content
-      if (output && output.content.includes(ex.validationValue)) {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
-      if (getNode(fs, ex.validationValue)) {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'file_missing') {
-      // Validation check for file deletion
-      if (!getNode(fs, ex.validationValue)) {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'cwd_check') {
-      if (cwd === ex.validationValue) {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'file_content') {
-      const [path, contentMatch] = ex.validationValue.split(':');
-      const node = getNode(fs, path);
-      if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
-        onCompleteExercise(ex.id);
-      }
-    } else if (ex.validationType === 'file_permissions') {
-      const [path, expectedPerms] = ex.validationValue.split(':');
-      const node = getNode(fs, path);
-      if (node) {
-        if (node.permissions === expectedPerms) {
-          onCompleteExercise(ex.id);
-        }
-      }
-    } else if (ex.validationType === 'command_output_match') {
-      const [cmdKeyword, expectedOutput] = ex.validationValue.split(':');
-      if (cmd.toLowerCase().includes(cmdKeyword.toLowerCase()) &&
-        output &&
-        output.content.includes(expectedOutput) &&
-        output.type !== 'error') {
-        onCompleteExercise(ex.id);
-      }
-    }
-  };
-
-  const handleCommandExecuted = (cmd: string, output: TerminalOutput) => {
-    // Find the first uncompleted exercise
-    const firstUncompleted = chapter.exercises.find(ex => !completedExercises.has(ex.id));
-
-    if (firstUncompleted) {
-      checkExerciseCompletion(firstUncompleted, cmd, output);
-    }
-  };
-
   // Effect to check FS-based objectives whenever FS or CWD changes
   useEffect(() => {
     // Find the first uncompleted exercise
     const firstUncompleted = chapter.exercises.find(ex => !completedExercises.has(ex.id));
 
     if (firstUncompleted) {
-      // We pass empty command/output because these checks (file_exists, etc.) don't depend on the immediate command
-      checkExerciseCompletion(firstUncompleted);
+      // Use the last executed command context for validation
+      checkExerciseCompletion(firstUncompleted, lastCommandRef.current.cmd, lastCommandRef.current.output);
     }
   }, [fs, cwd, chapter.exercises, completedExercises, onCompleteExercise]);
-
-
-  // Calc progress for current chapter
-  const currentChapterCompleted = chapter.exercises.filter(ex => completedExercises.has(ex.id)).length;
-  const currentChapterTotal = chapter.exercises.length;
-  const progressPercent = currentChapterTotal === 0 ? 0 : (currentChapterCompleted / currentChapterTotal) * 100;
 
   return (
     <div className="flex flex-col md:flex-row h-full min-h-[600px] md:min-h-[700px] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-900 relative">

@@ -32,8 +32,7 @@ export interface Exercise {
   id: string;
   question: string;
   hint: string;
-  validationType: 'command_success' | 'file_exists' | 'dir_exists' | 'file_content' | 'cwd_check' | 'output_match' | 'file_permissions' | 'file_missing';
-  validationValue: string; // The command expected, the file path, or "filename:content_string", or substring to match in output
+  validationValue: string;
   completed: boolean;
 }
 

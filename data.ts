@@ -93,48 +93,42 @@ export const CHAPTERS: Chapter[] = [
         id: "ex1_1",
         question: "Affichez le contenu de votre répertoire home.",
         hint: "Utilisez la commande `ls` simplement.",
-        validationType: 'command_success',
-        validationValue: 'ls',
+        validationValue: 'regexCmd:^ls(\\s+.*)?$',
         completed: false
       },
       {
         id: "ex1_2",
-        question: "Affichez tous les fichiers, y compris les cachés (commençant par .).",
+        question: "Affichez tous les fichiers, y compris les fichiers cachés (commençant par .).",
         hint: "L'option -a est nécessaire : `ls -a`.",
-        validationType: 'command_success',
-        validationValue: 'ls -a',
+        validationValue: 'regexCmd:^ls\\s+.*-a.*$',
         completed: false
       },
       {
         id: "ex1_3",
         question: "Allez à la racine du système directement.",
         hint: "La racine est représentée par le slash `/`.",
-        validationType: 'cwd_check',
-        validationValue: '/',
+        validationValue: 'cwd:/',
         completed: false
       },
       {
         id: "ex1_4",
         question: "Retournez dans votre home en une seule commande.",
         hint: "Tapez juste `cd` ou `cd ~`.",
-        validationType: 'cwd_check',
-        validationValue: '/home/etudiant',
+        validationValue: 'cwd:/home/etudiant',
         completed: false
       },
       {
         id: "ex1_5",
         question: "Listez les fichiers triés par taille décroissante (les plus gros en premier).",
         hint: "L'option majuscule -S permet de trier par taille : `ls -S`.",
-        validationType: 'command_success',
-        validationValue: 'ls -S',
+        validationValue: 'regexCmd:^ls\\s+.*-S.*$',
         completed: false
       },
       {
         id: "ex1_6",
         question: "Affichez les fichiers triés par taille croissante (inverse).",
         hint: "Combinez le tri par taille (-S) et l'inversion (-r) : `ls -Sr`.",
-        validationType: 'command_success',
-        validationValue: 'ls -Sr',
+        validationValue: 'regexCmd:^ls\\s+.*-S.*r.*$||regexCmd:^ls\\s+.*-r.*S.*$',
         completed: false
       }
     ]
@@ -168,64 +162,56 @@ export const CHAPTERS: Chapter[] = [
         id: "ex2_1",
         question: "Créez l'arborescence suivante : un dossier `Entreprise` contenant `compta99`, `compta00` et `fact00` (fichiers).",
         hint: "mkdir Entreprise; cd Entreprise; touch compta99 compta00 fact00",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/Entreprise/fact00',
+        validationValue: 'dir:/home/etudiant/Entreprise|file:/home/etudiant/Entreprise/compta99|file:/home/etudiant/Entreprise/compta00|file:/home/etudiant/Entreprise/fact00',
         completed: false
       },
       {
         id: "ex2_2",
         question: "Toujours dans `Entreprise`, créez le fichier `fact01`.",
         hint: "touch fact01 (assurez-vous d'être dans le dossier Entreprise)",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/Entreprise/fact01',
+        validationValue: 'file:/home/etudiant/Entreprise/fact01|type:file',
         completed: false
       },
       {
         id: "ex2_3",
         question: "Remontez dans votre home et créez le dossier `TP11`.",
         hint: "cd ..; mkdir TP11 (ou cd ~; mkdir TP11)",
-        validationType: 'dir_exists',
-        validationValue: '/home/etudiant/TP11',
+        validationValue: 'dir:/home/etudiant/TP11|type:directory',
         completed: false
       },
       {
         id: "ex2_4",
         question: "Copiez le fichier `fact00` (qui est dans Entreprise) vers le dossier `TP11` en utilisant un chemin absolu pour la source.",
         hint: "cp /home/etudiant/Entreprise/fact00 /home/etudiant/TP11/",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/TP11/fact00',
+        validationValue: 'file:/home/etudiant/TP11/fact00|file:/home/etudiant/Entreprise/fact00',
         completed: false
       },
       {
         id: "ex2_4b",
         question: "Copiez `fact01` vers `TP11` en utilisant un chemin relatif.",
         hint: "Depuis le home : cp Entreprise/fact01 TP11/",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/TP11/fact01',
+        validationValue: 'file:/home/etudiant/TP11/fact01',
         completed: false
       },
       {
         id: "ex2_4c",
         question: "Déplacez le fichier `compta99` dans le home, en utilisant des chemins relatifs.",
         hint: "mv Entreprise/compta99 .",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/compta99',
+        validationValue: 'file:/home/etudiant/compta99|missing:/home/etudiant/Entreprise/compta99',
         completed: false
       },
       {
         id: "ex2_5",
         question: "Copiez le répertoire `TP11` vers un nouveau répertoire `cpTP11` dans `Entreprise`. Attention, c'est un dossier !",
         hint: "cp -r TP11 Entreprise/cpTP11 (N'oubliez pas le -r pour un dossier !)",
-        validationType: 'dir_exists',
-        validationValue: '/home/etudiant/Entreprise/cpTP11',
+        validationValue: 'dir:/home/etudiant/Entreprise/cpTP11|type:directory',
         completed: false
       },
       {
         id: "ex2_6",
         question: "Supprimez le répertoire `TP11` et son contenu.",
         hint: "rm -r TP11",
-        validationType: 'command_success',
-        validationValue: 'rm -r TP11',
+        validationValue: 'missing:/home/etudiant/TP11',
         completed: false
       }
     ]
@@ -265,48 +251,42 @@ export const CHAPTERS: Chapter[] = [
       {
         id: "ex3_1",
         question: "Créez un fichier `telephone.txt` contenant ces données, avec **chaque entrée sur une ligne séparée** :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520", hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/telephone.txt:8316\ntoto',
+        validationValue: 'file:/home/etudiant/telephone.txt|content:regex:8316[\\s\\S]*toto',
         completed: false
       },
       {
         id: "ex3_2",
         question: "Affichez la liste triée par nom (alphabétique).",
         hint: "sort telephone.txt",
-        validationType: 'command_success',
-        validationValue: 'sort telephone.txt',
+        validationValue: 'regexCmd:^sort\\s+telephone\\.txt$||regexCmd:cat.*telephone\\.txt.*sort',
         completed: false
       },
       {
         id: "ex3_3",
         question: "Affichez uniquement les lignes des personnes dont le numéro contient '83'.",
         hint: "grep '83' telephone.txt (ou cat telephone.txt | grep '83')",
-        validationType: 'command_output_match',
-        validationValue: "grep:arthur 8316",
+        validationValue: 'regexCmd:grep.*83.*telephone\\.txt|output:arthur 8316||regexCmd:cat.*telephone\\.txt.*grep.*83|output:arthur 8316',
         completed: false
       },
       {
         id: "ex3_4",
         question: "Comptez combien de personnes sont dans la liste (nombre de lignes).",
         hint: "wc -l telephone.txt",
-        validationType: 'command_success',
-        validationValue: "wc -l telephone.txt",
+        validationValue: 'regexCmd:wc.*telephone\\.txt|output:4||regexCmd:cat.*telephone\\.txt.*wc.*-l|output:4',
         completed: false
       },
       {
         id: "ex3_5",
         question: "Le fichier `/proc/meminfo` contient des infos mémoire. Affichez les 5 premières lignes.",
         hint: "head -n 5 /proc/meminfo",
-        validationType: 'command_success',
-        validationValue: "head -n 5 /proc/meminfo",
+        validationValue: 'regexCmd:head.*\\/proc\\/meminfo|output:MemTotal',
         completed: false
       },
       {
         id: "ex3_6",
         question: "Cherchez combien de processeurs sont déclarés dans `/proc/cpuinfo` (comptez les lignes contenant 'processor').",
         hint: "grep 'processor' /proc/cpuinfo | wc -l",
-        validationType: 'output_match',
-        validationValue: "4",
+        validationValue: 'regexCmd:grep.*processor.*\\/proc\\/cpuinfo.*|output:4',
         completed: false
       }
     ]
@@ -347,32 +327,28 @@ export const CHAPTERS: Chapter[] = [
         id: "ex4_1",
         question: "Créez 3 fichiers : `file1.txt`, `file2.txt` et `image.png`.",
         hint: "touch file1.txt file2.txt image.png",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/image.png',
+        validationValue: 'file:/home/etudiant/file1.txt|type:file',
         completed: false
       },
       {
         id: "ex4_2",
         question: "Listez uniquement les fichiers se terminant par `.txt`.",
         hint: "ls *.txt",
-        validationType: 'command_success',
-        validationValue: 'ls *.txt',
+        validationValue: 'regexCmd:^ls.*\\.txt$|output:file1.txt',
         completed: false
       },
       {
         id: "ex4_3",
         question: "Sauvegardez la liste des fichiers `.txt` dans un fichier nommé `liste.log`.",
         hint: "ls *.txt > liste.log",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/liste.log',
+        validationValue: 'file:/home/etudiant/liste.log|type:file',
         completed: false
       },
       {
         id: "ex4_4",
         question: "Ajoutez la date actuelle à la fin du fichier `liste.log`.",
         hint: "date >> liste.log",
-        validationType: 'command_success',
-        validationValue: 'date >> liste.log',
+        validationValue: 'regexCmd:^date\\s+>>\\s+liste\\.log$',
         completed: false
       }
     ]
@@ -404,48 +380,42 @@ export const CHAPTERS: Chapter[] = [
         id: "ex5_1",
         question: "Affichez votre identifiant utilisateur (uid) et vos groupes.",
         hint: "Utilisez la commande `id`.",
-        validationType: 'command_success',
-        validationValue: 'id',
+        validationValue: 'regexCmd:^id$',
         completed: false
       },
       {
         id: "ex5_2",
         question: "Créez un dossier `Secret` et regardez ses droits par défaut.",
         hint: "mkdir Secret; ls -ld Secret",
-        validationType: 'dir_exists',
-        validationValue: '/home/etudiant/Secret',
+        validationValue: 'dir:/home/etudiant/Secret|type:directory',
         completed: false
       },
       {
         id: "ex5_3",
         question: "Enlevez le droit d'écriture sur `Secret` pour tout le monde (y compris vous).",
         hint: "chmod -w Secret (ou chmod 555 Secret)",
-        validationType: 'file_permissions',
-        validationValue: '/home/etudiant/Secret:dr-xr-xr-x',
+        validationValue: 'file:/home/etudiant/Secret|perms:dr-xr-xr-x',
         completed: false
       },
       {
         id: "ex5_4",
         question: "Essayez maintenant de créer un fichier dans `Secret` (Test d'interdiction).",
         hint: "touch Secret/test.txt (Cela devrait échouer !)",
-        validationType: 'output_match',
-        validationValue: 'Permission non accordée', // We now expect failure output
+        validationValue: 'regexCmd:^touch\\s+Secret\\/test\\.txt$|output:Permission non accordée',
         completed: false
       },
       {
         id: "ex5_5",
         question: "Redonnez-vous le droit d'écriture sur `Secret`.",
         hint: "chmod u+w Secret (ou chmod 755 Secret)",
-        validationType: 'file_permissions',
-        validationValue: '/home/etudiant/Secret:drwxr-xr-x',
+        validationValue: 'file:/home/etudiant/Secret|perms:drwxr-xr-x',
         completed: false
       },
       {
         id: "ex5_6",
         question: "Utilisez l'option récursive pour donner tous les droits (777) à `Secret` et son contenu.",
         hint: "chmod -R 777 Secret",
-        validationType: 'file_permissions',
-        validationValue: '/home/etudiant/Secret:drwxrwxrwx',
+        validationValue: 'file:/home/etudiant/Secret|perms:drwxrwxrwx',
         completed: false
       }
     ]
@@ -585,96 +555,84 @@ export const CHAPTERS: Chapter[] = [
         id: "ex6_1",
         question: "Créez un script `hello.sh` qui affiche 'Bonjour!' à l'écran. N'oubliez pas le shebang en première ligne.",
         hint: "#!/bin/bash\necho 'Bonjour!'",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/hello.sh:#!/bin/bash',
+        validationValue: 'file:/home/etudiant/hello.sh|content:regex:^#!/bin/bash',
         completed: false
       },
       {
         id: "ex6_2",
         question: "Créez `variables.sh` qui définit une variable NOM avec la valeur 'Linux' et affiche 'Salut' suivi de cette variable.",
         hint: "#!/bin/bash\nNOM='Linux'\necho \"Salut $NOM\"",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/variables.sh:NOM=',
+        validationValue: 'file:/home/etudiant/variables.sh|content:regex:NOM=',
         completed: false
       },
       {
         id: "ex6_3",
         question: "Créez `loop.sh` qui utilise une boucle for pour afficher les nombres de 1 à 5 (un par ligne).",
         hint: "#!/bin/bash\nfor i in 1 2 3 4 5; do\n  echo $i\ndone",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/loop.sh:for i in',
+        validationValue: 'file:/home/etudiant/loop.sh|content:regex:for\\s+i\\s+in',
         completed: false
       },
       {
         id: "ex6_4",
         question: "Créez `check_arg.sh` qui vérifie que exactement un argument est passé. Si ce n'est pas le cas, affichez un message d'usage et quittez avec exit 1.",
         hint: "#!/bin/bash\nif [ $# -ne 1 ]; then\n  echo \"Usage: $0 arg\"\n  exit 1\nfi\necho \"Arg: $1\"",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/check_arg.sh:$# -ne 1',
+        validationValue: 'file:/home/etudiant/check_arg.sh|content:regex:\\$#\\s+-ne\\s+1',
         completed: false
       },
       {
         id: "ex6_5",
         question: "Créez `test_num.sh` qui teste si le premier argument est un nombre entier. Utilisez une regex pour vérifier. Affichez 'Nombre' ou 'Pas nombre'.",
         hint: "#!/bin/bash\nif [[ $1 =~ ^[0-9]+$ ]]; then\n  echo \"Nombre\"\nelse\n  echo \"Pas nombre\"\nfi",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/test_num.sh:=~ ^[0-9]+$',
+        validationValue: 'file:/home/etudiant/test_num.sh|content:regex:=~\\s*\\^\\[0-9\\]\\+\\$',
         completed: false
       },
       {
         id: "ex6_6",
         question: "Créez `while_count.sh` qui utilise une boucle while pour compter de 0 à 4. Initialisez i à 0 et incrémentez avec une expression arithmétique.",
         hint: "#!/bin/bash\ni=0\nwhile [ $i -lt 5 ]; do\n  echo $i\n  i=$((i+1))\ndone",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/while_count.sh:while [',
+        validationValue: 'file:/home/etudiant/while_count.sh|content:regex:while\\s*\\[',
         completed: false
       },
       {
         id: "ex6_7",
         question: "Créez `for_arith.sh` qui utilise une boucle for arithmétique (style C) pour afficher les nombres de 1 à 10.",
         hint: "#!/bin/bash\nfor ((i=1; i<=10; i++)); do\n  echo $i\ndone",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/for_arith.sh:for ((',
+        validationValue: 'file:/home/etudiant/for_arith.sh|content:regex:for\\s*\\(\\(',
         completed: false
       },
       {
         id: "ex6_8",
         question: "Créez `facto.sh` qui calcule la factorielle du premier argument. Utilisez une boucle for arithmétique et une multiplication avec $((...)). Affichez le résultat au format 'N! = résultat'.",
         hint: "#!/bin/bash\nn=$1\nfact=1\nfor ((i=1; i<=n; i++)); do\n  fact=$((fact*i))\ndone\necho \"$n! = $fact\"",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/facto.sh:fact=$((fact',
+        validationValue: 'file:/home/etudiant/facto.sh|content:regex:fact=\\$\\(\\(fact',
         completed: false
       },
       {
         id: "ex6_9",
         question: "Créez `menu.sh` qui utilise une structure case pour gérer 3 cas : 'start' affiche GO, 'stop' affiche STOP, et tout autre cas affiche un point d'interrogation.",
         hint: "#!/bin/bash\ncase $1 in\n  start) echo \"GO\" ;;\n  stop) echo \"STOP\" ;;\n  *) echo \"?\" ;;\nesac",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/menu.sh:case $1 in',
+        validationValue: 'file:/home/etudiant/menu.sh|content:regex:case\\s+\\$1\\s+in',
         completed: false
       },
       {
         id: "ex6_10",
         question: "Créez `ask.sh` qui demande le nom de l'utilisateur avec un prompt 'Nom: ', puis affiche 'Bonjour' suivi du nom saisi.",
         hint: "#!/bin/bash\nread -p \"Nom: \" nom\necho \"Bonjour $nom!\"",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/ask.sh:read -p',
+        validationValue: 'file:/home/etudiant/ask.sh|content:regex:read\\s+-p',
         completed: false
       },
       {
         id: "ex6_11",
         question: "Créez `sum.sh` qui demande deux nombres à l'utilisateur (avec read), calcule leur somme avec une expression arithmétique, et affiche le résultat.",
         hint: "#!/bin/bash\nread -p \"a: \" a\nread -p \"b: \" b\nsum=$((a+b))\necho \"$sum\"",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/sum.sh:sum=$((a+b))',
+        validationValue: 'file:/home/etudiant/sum.sh|content:regex:sum=\\$\\(\\(a\\+b\\)\\)',
         completed: false
       },
       {
         id: "ex6_12",
         question: "Créez `check_file.sh` qui teste si le fichier passé en argument existe. Affichez 'Existe' si le fichier existe, 'Non' sinon.",
         hint: "#!/bin/bash\nif [ -f \"$1\" ]; then\n  echo \"Existe\"\nelse\n  echo \"Non\"\nfi",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/check_file.sh:-f',
+        validationValue: 'file:/home/etudiant/check_file.sh|content:regex:-f',
         completed: false
       }
     ]
@@ -707,24 +665,21 @@ export const CHAPTERS: Chapter[] = [
         id: "ex7_1",
         question: "Affichez la liste de vos processus actuels.",
         hint: "Utilisez `ps`.",
-        validationType: 'command_success',
-        validationValue: 'ps',
+        validationValue: 'regexCmd:^ps(\\s+.*)?$',
         completed: false
       },
       {
         id: "ex7_2",
         question: "Simulez l'arrêt du processus avec le PID 1234.",
         hint: "kill 1234",
-        validationType: 'command_success',
-        validationValue: 'kill 1234',
+        validationValue: 'regexCmd:^kill\\s+1234$',
         completed: false
       },
       {
         id: "ex7_3",
-        question: "Forcez l'arrêt brutal (kill -9) du processus 5678.",
+        question: "Forcez l'arrêt brutal du processus 5678.",
         hint: "kill -9 5678",
-        validationType: 'command_success',
-        validationValue: 'kill -9 5678',
+        validationValue: 'regexCmd:^kill\\s+-9\\s+5678$',
         completed: false
       }
     ]
@@ -780,40 +735,35 @@ export const CHAPTERS: Chapter[] = [
         id: "ex8_1",
         question: "Listez les fichiers du dossier `Glob` qui ont exactement 2 caractères.",
         hint: "Vous pouvez aller dans le dossier (`cd Glob`) puis faire `ls ??` ou utiliser un chemin relatif (`ls Glob/??`).",
-        validationType: 'output_match',
-        validationValue: 'aa', // Matches one of the expected files (aa, ab, ac...)
+        validationValue: 'regexCmd:^ls.*|output:aa',
         completed: false
       },
       {
         id: "ex8_2",
         question: "Dans `dico.txt`, utilisez grep pour trouver le mot qui correspond au motif du DS : commence par t, 2e lettre entre c et h, suivi de 4 caractères, avant-dernier b ou y, dernier caractère PAS entre c et h.",
         hint: "grep -E \"^t[c-h].{4}[by][^c-h]$\" dico.txt",
-        validationType: 'output_match',
-        validationValue: 'tcaaaabk',
+        validationValue: 'regexCmd:^grep.*dico\\.txt|output:tcaaaabk',
         completed: false
       },
       {
         id: "ex8_3",
         question: "Créez le script `somprod.sh`. Il doit vérifier qu'il y a au moins 3 arguments (`$#`). Si ce n'est pas le cas, affichez une erreur et quittez. (Utilisez l'onglet LABO).",
         hint: "#!/bin/bash\nif [ $# -lt 3 ]; then\n  echo \"Usage: somprod.sh op arg1 arg2...\"\n  exit 1\nfi",
-        validationType: 'file_content',
-        validationValue: '/home/etudiant/somprod.sh:$# -lt 3',
+        validationValue: 'file:/home/etudiant/somprod.sh|content:regex:\\$#\\s+-lt\\s+3',
         completed: false
       },
       {
         id: "ex8_4",
         question: "Allez dans le dossier `Exam`. Tentez de supprimer le fichier `sujet.pdf`. Cela doit échouer car le dossier est protégé en écriture.",
         hint: "cd Exam; rm sujet.pdf",
-        validationType: 'output_match',
-        validationValue: 'Permission non accordée',
+        validationValue: 'regexCmd:^rm.*sujet\\.pdf|output:Permission non accordée',
         completed: false
       },
       {
         id: "ex8_5",
         question: "Corrigez les droits du dossier `Exam` pour vous donner le droit d'écriture, puis supprimez le fichier `sujet.pdf`.",
         hint: "chmod u+w .; rm sujet.pdf",
-        validationType: 'file_missing',
-        validationValue: '/home/etudiant/Exam/sujet.pdf',
+        validationValue: 'missing:/home/etudiant/Exam/sujet.pdf',
         completed: false
       }
     ]
