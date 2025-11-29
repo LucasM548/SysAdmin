@@ -281,8 +281,8 @@ export const CHAPTERS: Chapter[] = [
         id: "ex3_3",
         question: "Affichez uniquement les lignes des personnes dont le numéro contient '83'.",
         hint: "grep '83' telephone.txt (ou cat telephone.txt | grep '83')",
-        validationType: 'output_match',
-        validationValue: "8316",
+        validationType: 'command_output_match',
+        validationValue: "grep:arthur 8316",
         completed: false
       },
       {

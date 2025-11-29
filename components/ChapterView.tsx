@@ -94,51 +94,59 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
 
 
   const checkExerciseCompletion = (ex: Exercise, cmd: string = '', output: TerminalOutput | null = null) => {
-      if (ex.validationType === 'command_success') {
-        if (cmd.trim() === ex.validationValue && output && output.type !== 'error') {
-          onCompleteExercise(ex.id);
-        }
-      } else if (ex.validationType === 'output_match') {
-         // Allow checking both success content and error content
-         if (output && output.content.includes(ex.validationValue)) {
-             onCompleteExercise(ex.id);
-         }
-      } else if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
-        if (getNode(fs, ex.validationValue)) {
-          onCompleteExercise(ex.id);
-        }
-      } else if (ex.validationType === 'file_missing') {
-        // Validation check for file deletion
-        if (!getNode(fs, ex.validationValue)) {
-          onCompleteExercise(ex.id);
-        }
-      } else if (ex.validationType === 'cwd_check') {
-        if (cwd === ex.validationValue) {
-          onCompleteExercise(ex.id);
-        }
-      } else if (ex.validationType === 'file_content') {
-        const [path, contentMatch] = ex.validationValue.split(':');
-        const node = getNode(fs, path);
-        if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
-          onCompleteExercise(ex.id);
-        }
-      } else if (ex.validationType === 'file_permissions') {
-         const [path, expectedPerms] = ex.validationValue.split(':');
-         const node = getNode(fs, path);
-         if (node) {
-            if (node.permissions === expectedPerms) {
-                onCompleteExercise(ex.id);
-            }
-         }
+    if (ex.validationType === 'command_success') {
+      if (cmd.trim() === ex.validationValue && output && output.type !== 'error') {
+        onCompleteExercise(ex.id);
       }
+    } else if (ex.validationType === 'output_match') {
+      // Allow checking both success content and error content
+      if (output && output.content.includes(ex.validationValue)) {
+        onCompleteExercise(ex.id);
+      }
+    } else if (ex.validationType === 'file_exists' || ex.validationType === 'dir_exists') {
+      if (getNode(fs, ex.validationValue)) {
+        onCompleteExercise(ex.id);
+      }
+    } else if (ex.validationType === 'file_missing') {
+      // Validation check for file deletion
+      if (!getNode(fs, ex.validationValue)) {
+        onCompleteExercise(ex.id);
+      }
+    } else if (ex.validationType === 'cwd_check') {
+      if (cwd === ex.validationValue) {
+        onCompleteExercise(ex.id);
+      }
+    } else if (ex.validationType === 'file_content') {
+      const [path, contentMatch] = ex.validationValue.split(':');
+      const node = getNode(fs, path);
+      if (node && node.type === 'file' && node.content && node.content.includes(contentMatch)) {
+        onCompleteExercise(ex.id);
+      }
+    } else if (ex.validationType === 'file_permissions') {
+      const [path, expectedPerms] = ex.validationValue.split(':');
+      const node = getNode(fs, path);
+      if (node) {
+        if (node.permissions === expectedPerms) {
+          onCompleteExercise(ex.id);
+        }
+      }
+    } else if (ex.validationType === 'command_output_match') {
+      const [cmdKeyword, expectedOutput] = ex.validationValue.split(':');
+      if (cmd.toLowerCase().includes(cmdKeyword.toLowerCase()) &&
+        output &&
+        output.content.includes(expectedOutput) &&
+        output.type !== 'error') {
+        onCompleteExercise(ex.id);
+      }
+    }
   };
 
   const handleCommandExecuted = (cmd: string, output: TerminalOutput) => {
     // Find the first uncompleted exercise
     const firstUncompleted = chapter.exercises.find(ex => !completedExercises.has(ex.id));
-    
+
     if (firstUncompleted) {
-        checkExerciseCompletion(firstUncompleted, cmd, output);
+      checkExerciseCompletion(firstUncompleted, cmd, output);
     }
   };
 
@@ -146,10 +154,10 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
   useEffect(() => {
     // Find the first uncompleted exercise
     const firstUncompleted = chapter.exercises.find(ex => !completedExercises.has(ex.id));
-    
+
     if (firstUncompleted) {
-        // We pass empty command/output because these checks (file_exists, etc.) don't depend on the immediate command
-        checkExerciseCompletion(firstUncompleted);
+      // We pass empty command/output because these checks (file_exists, etc.) don't depend on the immediate command
+      checkExerciseCompletion(firstUncompleted);
     }
   }, [fs, cwd, chapter.exercises, completedExercises, onCompleteExercise]);
 
@@ -349,56 +357,56 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
                     Exercices à réaliser
                   </h3>
                   <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
-                     {currentChapterCompleted}/{currentChapterTotal}
+                    {currentChapterCompleted}/{currentChapterTotal}
                   </span>
                 </div>
                 <div className="p-3 overflow-y-auto scrollbar-thin space-y-3">
-                   {chapter.exercises.map((exercise, index) => {
-                      const isCompleted = completedExercises.has(exercise.id);
-                      // Sort: incomplete first
-                      if (isCompleted && chapter.exercises.some(e => !completedExercises.has(e.id))) return null; 
-                      
-                      return (
-                        <div
-                          key={exercise.id}
-                          className={`p-3 rounded-lg border transition-all ${isCompleted
-                            ? 'bg-emerald-900/10 border-emerald-500/20 opacity-60'
-                            : 'bg-slate-900/50 border-slate-800'
-                            }`}
-                        >
-                          <div className="flex gap-3">
-                            <div className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 ${isCompleted
-                              ? 'bg-emerald-500 text-white'
-                              : 'bg-slate-800 text-slate-500 border border-slate-700'
-                              }`}>
-                              {isCompleted ? <CheckCircle size={12} /> : index + 1}
-                            </div>
-                            <div className="flex-1">
-                              <p className={`text-xs font-medium leading-relaxed ${isCompleted ? 'text-slate-500' : 'text-slate-300'}`}>
-                                {exercise.question.split('`').map((part, i) =>
-                                  i % 2 === 1
-                                    ? <code key={i} className="bg-slate-950 px-1 py-0.5 rounded text-blue-300 font-mono text-[10px] border border-slate-800 mx-0.5">{part}</code>
-                                    : part
-                                )}
-                              </p>
-                              {!isCompleted && <ExerciseHint hint={exercise.hint} compact={true} />}
-                            </div>
+                  {chapter.exercises.map((exercise, index) => {
+                    const isCompleted = completedExercises.has(exercise.id);
+                    // Sort: incomplete first
+                    if (isCompleted && chapter.exercises.some(e => !completedExercises.has(e.id))) return null;
+
+                    return (
+                      <div
+                        key={exercise.id}
+                        className={`p-3 rounded-lg border transition-all ${isCompleted
+                          ? 'bg-emerald-900/10 border-emerald-500/20 opacity-60'
+                          : 'bg-slate-900/50 border-slate-800'
+                          }`}
+                      >
+                        <div className="flex gap-3">
+                          <div className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 ${isCompleted
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-slate-800 text-slate-500 border border-slate-700'
+                            }`}>
+                            {isCompleted ? <CheckCircle size={12} /> : index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className={`text-xs font-medium leading-relaxed ${isCompleted ? 'text-slate-500' : 'text-slate-300'}`}>
+                              {exercise.question.split('`').map((part, i) =>
+                                i % 2 === 1
+                                  ? <code key={i} className="bg-slate-950 px-1 py-0.5 rounded text-blue-300 font-mono text-[10px] border border-slate-800 mx-0.5">{part}</code>
+                                  : part
+                              )}
+                            </p>
+                            {!isCompleted && <ExerciseHint hint={exercise.hint} compact={true} />}
                           </div>
                         </div>
-                      );
-                   })}
-                   {/* Show message if all hidden (all done) */}
-                   {currentChapterCompleted > 0 && currentChapterCompleted < currentChapterTotal && (
-                      <div className="text-center py-2 text-[10px] text-slate-600 italic">
-                         Exercices terminés masqués
                       </div>
-                   )}
-                   {currentChapterCompleted === currentChapterTotal && (
-                      <div className="flex flex-col items-center justify-center py-4 text-emerald-500 gap-2">
-                         <CheckCircle size={24} />
-                         <span className="text-sm font-bold">Tous les exercices validés !</span>
-                      </div>
-                   )}
+                    );
+                  })}
+                  {/* Show message if all hidden (all done) */}
+                  {currentChapterCompleted > 0 && currentChapterCompleted < currentChapterTotal && (
+                    <div className="text-center py-2 text-[10px] text-slate-600 italic">
+                      Exercices terminés masqués
+                    </div>
+                  )}
+                  {currentChapterCompleted === currentChapterTotal && (
+                    <div className="flex flex-col items-center justify-center py-4 text-emerald-500 gap-2">
+                      <CheckCircle size={24} />
+                      <span className="text-sm font-bold">Tous les exercices validés !</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -422,16 +430,16 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
                   // Basic logic to determine if this exercise is "locked"
                   // It is locked if it is NOT completed AND the previous one is NOT completed
                   // Exception: index 0 is never locked.
-                  const isLocked = !isCompleted && index > 0 && !completedExercises.has(chapter.exercises[index-1].id);
+                  const isLocked = !isCompleted && index > 0 && !completedExercises.has(chapter.exercises[index - 1].id);
 
                   return (
                     <div
                       key={exercise.id}
                       className={`p-5 rounded-xl border transition-all duration-300 ${isCompleted
                         ? 'bg-emerald-900/10 border-emerald-500/30'
-                        : isLocked 
-                            ? 'bg-slate-950/30 border-slate-800/50 opacity-50' 
-                            : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                        : isLocked
+                          ? 'bg-slate-950/30 border-slate-800/50 opacity-50'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                         }`}
                     >
                       <div className="flex gap-4">
@@ -457,11 +465,11 @@ const ChapterView: React.FC<ChapterViewProps> = ({ chapter, completedExercises, 
                               <CheckCircle size={12} /> Validé
                             </div>
                           )}
-                          
+
                           {isLocked && (
-                             <div className="mt-2 text-xs text-slate-600 italic">
-                                Terminez l'exercice précédent pour débloquer.
-                             </div>
+                            <div className="mt-2 text-xs text-slate-600 italic">
+                              Terminez l'exercice précédent pour débloquer.
+                            </div>
                           )}
                         </div>
                       </div>

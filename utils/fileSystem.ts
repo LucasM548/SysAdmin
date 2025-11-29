@@ -4,128 +4,128 @@ import { FileSystemNode, TerminalOutput } from '../types';
 const uid = () => Math.random().toString(36).substring(2, 9);
 
 export const DEFAULT_FS: FileSystemNode = {
-  type: 'directory',
-  name: 'root',
-  permissions: 'drwxr-xr-x',
-  owner: 'root',
-  children: {
-    'home': {
-      type: 'directory',
-      name: 'home',
-      permissions: 'drwxr-xr-x',
-      owner: 'root',
-      children: {
-        'etudiant': {
-          type: 'directory',
-          name: 'etudiant',
-          permissions: 'drwxr-xr-x',
-          owner: 'etudiant',
-          children: {
-            'Documents': {
-              type: 'directory',
-              name: 'Documents',
-              permissions: 'drwxr-xr-x',
-              owner: 'etudiant',
-              children: {}
-            },
-            '.bashrc': {
-              type: 'file',
-              name: '.bashrc',
-              permissions: '-rw-r--r--',
-              owner: 'etudiant',
-              content: '# .bashrc configuration'
-            },
-            'notes.txt': {
-              type: 'file',
-              name: 'notes.txt',
-              permissions: '-rw-r--r--',
-              owner: 'etudiant',
-              content: 'Bienvenue dans le cours R1.04\nSystème d\'Exploitation\nLinux est puissant\nIl faut pratiquer'
-            },
-            'todo.list': {
-              type: 'file',
-              name: 'todo.list',
-              permissions: '-rw-r--r--',
-              owner: 'etudiant',
-              content: '1. Apprendre Linux\n2. Maîtriser le Terminal\n3. Dormir'
+    type: 'directory',
+    name: 'root',
+    permissions: 'drwxr-xr-x',
+    owner: 'root',
+    children: {
+        'home': {
+            type: 'directory',
+            name: 'home',
+            permissions: 'drwxr-xr-x',
+            owner: 'root',
+            children: {
+                'etudiant': {
+                    type: 'directory',
+                    name: 'etudiant',
+                    permissions: 'drwxr-xr-x',
+                    owner: 'etudiant',
+                    children: {
+                        'Documents': {
+                            type: 'directory',
+                            name: 'Documents',
+                            permissions: 'drwxr-xr-x',
+                            owner: 'etudiant',
+                            children: {}
+                        },
+                        '.bashrc': {
+                            type: 'file',
+                            name: '.bashrc',
+                            permissions: '-rw-r--r--',
+                            owner: 'etudiant',
+                            content: '# .bashrc configuration'
+                        },
+                        'notes.txt': {
+                            type: 'file',
+                            name: 'notes.txt',
+                            permissions: '-rw-r--r--',
+                            owner: 'etudiant',
+                            content: 'Bienvenue dans le cours R1.04\nSystème d\'Exploitation\nLinux est puissant\nIl faut pratiquer'
+                        },
+                        'todo.list': {
+                            type: 'file',
+                            name: 'todo.list',
+                            permissions: '-rw-r--r--',
+                            owner: 'etudiant',
+                            content: '1. Apprendre Linux\n2. Maîtriser le Terminal\n3. Dormir'
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    },
-    'bin': { type: 'directory', name: 'bin', permissions: 'drwxr-xr-x', owner: 'root', children: {} },
-    'etc': { 
-        type: 'directory', 
-        name: 'etc', 
-        permissions: 'drwxr-xr-x', 
-        owner: 'root', 
-        children: {
-            'passwd': { type: 'file', name: 'passwd', permissions: '-rw-r--r--', owner: 'root', content: 'root:x:0:0:root:/root:/bin/bash\netudiant:x:1000:1000:Etudiant,,,:/home/etudiant:/bin/bash' }
-        } 
-    },
-    'proc': {
-        type: 'directory',
-        name: 'proc',
-        permissions: 'dr-xr-xr-x',
-        owner: 'root',
-        children: {
-            'cpuinfo': {
-                type: 'file',
-                name: 'cpuinfo',
-                permissions: '-r--r--r--',
-                owner: 'root',
-                content: 'processor\t: 0\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz'
-            },
-            'meminfo': {
-                type: 'file',
-                name: 'meminfo',
-                permissions: '-r--r--r--',
-                owner: 'root',
-                content: 'MemTotal:       16306560 kB\nMemFree:         3245680 kB\nMemAvailable:   10234560 kB\nBuffers:          456120 kB\nCached:          5678900 kB'
+        },
+        'bin': { type: 'directory', name: 'bin', permissions: 'drwxr-xr-x', owner: 'root', children: {} },
+        'etc': {
+            type: 'directory',
+            name: 'etc',
+            permissions: 'drwxr-xr-x',
+            owner: 'root',
+            children: {
+                'passwd': { type: 'file', name: 'passwd', permissions: '-rw-r--r--', owner: 'root', content: 'root:x:0:0:root:/root:/bin/bash\netudiant:x:1000:1000:Etudiant,,,:/home/etudiant:/bin/bash' }
             }
-        }
-    },
-    'tmp': { type: 'directory', name: 'tmp', permissions: 'drwxrwxrwt', owner: 'root', children: {} }
-  }
+        },
+        'proc': {
+            type: 'directory',
+            name: 'proc',
+            permissions: 'dr-xr-xr-x',
+            owner: 'root',
+            children: {
+                'cpuinfo': {
+                    type: 'file',
+                    name: 'cpuinfo',
+                    permissions: '-r--r--r--',
+                    owner: 'root',
+                    content: 'processor\t: 0\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\nmodel name\t: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz'
+                },
+                'meminfo': {
+                    type: 'file',
+                    name: 'meminfo',
+                    permissions: '-r--r--r--',
+                    owner: 'root',
+                    content: 'MemTotal:       16306560 kB\nMemFree:         3245680 kB\nMemAvailable:   10234560 kB\nBuffers:          456120 kB\nCached:          5678900 kB'
+                }
+            }
+        },
+        'tmp': { type: 'directory', name: 'tmp', permissions: 'drwxrwxrwt', owner: 'root', children: {} }
+    }
 };
 
 // Traverse path to get node
 export const getNode = (root: FileSystemNode, path: string): FileSystemNode | null => {
-  if (path === '/') return root;
-  
-  const parts = path.split('/').filter(p => p !== '');
-  let current = root;
-  
-  for (const part of parts) {
-    if (current.type !== 'directory' || !current.children || !current.children[part]) {
-      return null;
+    if (path === '/') return root;
+
+    const parts = path.split('/').filter(p => p !== '');
+    let current = root;
+
+    for (const part of parts) {
+        if (current.type !== 'directory' || !current.children || !current.children[part]) {
+            return null;
+        }
+        current = current.children[part];
     }
-    current = current.children[part];
-  }
-  return current;
+    return current;
 };
 
 // Resolve path (handle ., .., and relative paths)
 export const resolvePath = (cwd: string, target: string): string => {
-  if (!target) return cwd;
-  if (target.startsWith('/')) return target; // Absolute
-  if (target === '~') return '/home/etudiant';
-  
-  const parts = cwd.split('/').filter(p => p !== '');
-  const targetParts = target.split('/');
+    if (!target) return cwd;
+    if (target.startsWith('/')) return target; // Absolute
+    if (target === '~') return '/home/etudiant';
 
-  for (const part of targetParts) {
-    if (part === '.' || part === '') continue;
-    if (part === '..') {
-      parts.pop();
-    } else if (part === '~') {
-        return '/home/etudiant';
-    } else {
-      parts.push(part);
+    const parts = cwd.split('/').filter(p => p !== '');
+    const targetParts = target.split('/');
+
+    for (const part of targetParts) {
+        if (part === '.' || part === '') continue;
+        if (part === '..') {
+            parts.pop();
+        } else if (part === '~') {
+            return '/home/etudiant';
+        } else {
+            parts.push(part);
+        }
     }
-  }
-  
-  return '/' + parts.join('/');
+
+    return '/' + parts.join('/');
 };
 
 // Helper: Check if a file is executable
@@ -148,13 +148,13 @@ const evaluateMath = (expr: string): string | null => {
     try {
         // Security: Remove anything that isn't a number or basic math operator
         const sanitized = expr.replace(/[^0-9\s+\-*/%()]/g, '');
-        
+
         // If empty or invalid chars were stripped to empty (or just whitespace), abort
         if (!sanitized.trim()) return null;
 
         // Use Function to evaluate strictly math
         const val = new Function(`return Math.floor(${sanitized})`)();
-        
+
         // Ensure result is a finite number
         if (!Number.isFinite(val) || Number.isNaN(val)) return null;
 
@@ -167,7 +167,7 @@ const evaluateMath = (expr: string): string | null => {
 // Helper: Variable substitution
 const substituteVariables = (text: string, variables: Record<string, string>): string => {
     let result = text;
-    
+
     // 1. Substitute $VAR and ${VAR}
     for (const [key, val] of Object.entries(variables)) {
         // Safe regex escape for key
@@ -187,7 +187,7 @@ const substituteVariables = (text: string, variables: Record<string, string>): s
             // In a loop definition (e.g., inside runScriptLines for detection), this variable might 
             // not be defined yet (e.g. $i). We should defer evaluation in this case.
             if (expr.includes('$')) return match;
-            
+
             const evalResult = evaluateMath(expr);
             return evalResult !== null ? evalResult : match;
         });
@@ -216,73 +216,73 @@ const hasFlag = (params: string[], flagChar: string): boolean => {
 // Helper: Expand Glob Pattern
 const expandGlob = (arg: string, cwd: string, root: FileSystemNode): string[] => {
     if (!arg.includes('*') && !arg.includes('?')) return [arg];
-    
+
     const fullPathWithPattern = resolvePath(cwd, arg);
     const lastSlash = fullPathWithPattern.lastIndexOf('/');
     const dirPath = fullPathWithPattern.substring(0, lastSlash) || '/';
     const pattern = fullPathWithPattern.substring(lastSlash + 1);
-    
+
     const dirNode = getNode(root, dirPath);
     if (!dirNode || dirNode.type !== 'directory' || !dirNode.children) {
-        return [arg]; 
+        return [arg];
     }
-    
+
     const regex = new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.')}$`);
     const matches = Object.keys(dirNode.children).filter(name => regex.test(name));
-    
+
     if (matches.length === 0) return [arg];
-    
+
     const prefixIndex = arg.lastIndexOf('/');
     const prefix = prefixIndex !== -1 ? arg.substring(0, prefixIndex + 1) : '';
-    
+
     return matches.sort().map(m => prefix + m);
 };
 
 // Save file directly
 export const saveFile = (
-  filepath: string,
-  content: string,
-  cwd: string,
-  root: FileSystemNode,
-  setFs: (newFs: FileSystemNode) => void,
-  permissions?: string
+    filepath: string,
+    content: string,
+    cwd: string,
+    root: FileSystemNode,
+    setFs: (newFs: FileSystemNode) => void,
+    permissions?: string
 ): boolean => {
-  const newFs = getClonedFs(root);
-  const targetPath = resolvePath(cwd, filepath);
-  const [parentNode, filename] = getParentAndName(targetPath, newFs);
+    const newFs = getClonedFs(root);
+    const targetPath = resolvePath(cwd, filepath);
+    const [parentNode, filename] = getParentAndName(targetPath, newFs);
 
-  if (!parentNode || parentNode.type !== 'directory' || !filename) {
-    return false;
-  }
+    if (!parentNode || parentNode.type !== 'directory' || !filename) {
+        return false;
+    }
 
-  if (!canWrite(parentNode)) {
-      return false;
-  }
+    if (!canWrite(parentNode)) {
+        return false;
+    }
 
-  if (!parentNode.children) {
-      parentNode.children = {};
-  }
+    if (!parentNode.children) {
+        parentNode.children = {};
+    }
 
-  if (parentNode.children[filename]) {
-      if (parentNode.children[filename].type === 'directory') return false;
-      if (!canWrite(parentNode.children[filename])) return false;
-      
-      parentNode.children[filename].content = content;
-      if (permissions) {
-          parentNode.children[filename].permissions = permissions;
-      }
-  } else {
-      parentNode.children[filename] = {
-          type: 'file',
-          name: filename,
-          permissions: permissions || '-rw-r--r--',
-          owner: 'etudiant',
-          content: content
-      };
-  }
+    if (parentNode.children[filename]) {
+        if (parentNode.children[filename].type === 'directory') return false;
+        if (!canWrite(parentNode.children[filename])) return false;
 
-  setFs(newFs);
-  return true;
+        parentNode.children[filename].content = content;
+        if (permissions) {
+            parentNode.children[filename].permissions = permissions;
+        }
+    } else {
+        parentNode.children[filename] = {
+            type: 'file',
+            name: filename,
+            permissions: permissions || '-rw-r--r--',
+            owner: 'etudiant',
+            content: content
+        };
+    }
+
+    setFs(newFs);
+    return true;
 };
 
 // --- Script Execution Engine ---
@@ -295,7 +295,7 @@ const runScriptLines = (
     baseVars: Record<string, string>
 ): TerminalOutput => {
     let output = '';
-    let currentFs = fs; 
+    let currentFs = fs;
     let scriptVars: Record<string, string> = { ...baseVars };
 
     // Map args to $1, $2, etc.
@@ -305,7 +305,7 @@ const runScriptLines = (
 
     const localSetFs = (newFs: FileSystemNode) => {
         currentFs = newFs;
-        setFs(newFs); 
+        setFs(newFs);
     };
 
     for (let i = 0; i < lines.length; i++) {
@@ -316,52 +316,52 @@ const runScriptLines = (
         const assignmentMatch = line.match(/^([a-zA-Z_]\w*)=(.*)$/);
         if (assignmentMatch && !line.startsWith('if') && !line.startsWith('for')) {
             const varName = assignmentMatch[1];
-            let rest = assignmentMatch[2]; 
-            
+            let rest = assignmentMatch[2];
+
             // Substitute vars in the value part (RHS) before assigning
             rest = substituteVariables(rest, scriptVars);
 
             let value = '';
             let cmdToRun = '';
-            
+
             // Parse value - check for quotes
             if (rest.startsWith("'")) {
-                    const endQ = rest.indexOf("'", 1);
-                    if (endQ !== -1) {
-                        value = rest.substring(1, endQ);
-                        cmdToRun = rest.substring(endQ + 1).trim();
-                    } else {
-                        value = rest.substring(1); 
-                    }
+                const endQ = rest.indexOf("'", 1);
+                if (endQ !== -1) {
+                    value = rest.substring(1, endQ);
+                    cmdToRun = rest.substring(endQ + 1).trim();
+                } else {
+                    value = rest.substring(1);
+                }
             } else if (rest.startsWith('"')) {
-                    const endQ = rest.indexOf('"', 1);
-                    if (endQ !== -1) {
-                        value = rest.substring(1, endQ);
-                        cmdToRun = rest.substring(endQ + 1).trim();
-                    } else {
-                        value = rest.substring(1);
-                    }
+                const endQ = rest.indexOf('"', 1);
+                if (endQ !== -1) {
+                    value = rest.substring(1, endQ);
+                    cmdToRun = rest.substring(endQ + 1).trim();
+                } else {
+                    value = rest.substring(1);
+                }
             } else {
-                    const spaceIdx = rest.search(/\s/);
-                    if (spaceIdx !== -1) {
-                        value = rest.substring(0, spaceIdx);
-                        cmdToRun = rest.substring(spaceIdx).trim();
-                    } else {
-                        value = rest;
-                    }
+                const spaceIdx = rest.search(/\s/);
+                if (spaceIdx !== -1) {
+                    value = rest.substring(0, spaceIdx);
+                    cmdToRun = rest.substring(spaceIdx).trim();
+                } else {
+                    value = rest;
+                }
             }
-            
+
             if (cmdToRun) {
                 // Temporary assignment for this command only
                 const tempVars = { ...scriptVars, [varName]: value };
                 const res = executeCommand(cmdToRun, cwd, currentFs, localSetFs, tempVars);
                 if (res.content) output += res.content + '\n';
-                if (res.type === 'error') output += `Error line ${i+1}: ${res.content}\n`;
+                if (res.type === 'error') output += `Error line ${i + 1}: ${res.content}\n`;
             } else {
                 // Permanent assignment
                 scriptVars[varName] = value;
             }
-            continue; 
+            continue;
         }
 
         // Before loop processing, substitute variables in the line (e.g. for `seq $1`)
@@ -371,7 +371,7 @@ const runScriptLines = (
         if (processedLine.startsWith('for ')) {
             // Updated Regex to be non-greedy and support different separators
             const oneLineMatch = processedLine.match(/^for\s+(\w+)\s+in\s+(.+?)(?:;\s*|\s+)do\s+(.+?)(?:;\s*|\s+)done$/);
-            
+
             if (oneLineMatch) {
                 const varName = oneLineMatch[1];
                 const listStr = oneLineMatch[2];
@@ -384,7 +384,7 @@ const runScriptLines = (
                         // if only one arg, it's end. if two, start and end.
                         const start = seqMatch[2] ? (seqMatch[1] ? parseInt(seqMatch[1]) : 1) : 1;
                         const end = seqMatch[2] ? parseInt(seqMatch[2]) : parseInt(seqMatch[1]);
-                        
+
                         for (let n = start; n <= end; n++) items.push(n.toString());
                     }
                 } else {
@@ -399,7 +399,7 @@ const runScriptLines = (
                     if (res.content || res.content === '') output += res.content + '\n';
                     if (res.type === 'error') output += `Loop Error: ${res.content}\n`;
                 }
-                continue; 
+                continue;
             }
 
             // Multi-line loop
@@ -426,27 +426,27 @@ const runScriptLines = (
                     const bodyLine = lines[j].trim();
                     if (bodyLine.startsWith('for ')) depth++; // Nested loops not fully parsed but tracking depth
                     if (bodyLine === 'do') {
-                         // 'do' might be on the same line as 'for', already handled above? 
-                         // No, if multi-line, 'do' is usually next line or after ;
+                        // 'do' might be on the same line as 'for', already handled above? 
+                        // No, if multi-line, 'do' is usually next line or after ;
                     }
                     if (bodyLine === 'done') depth--;
-                    
+
                     if (bodyLine !== 'do' && bodyLine !== 'done' && depth > 0) {
                         // Handle 'do' on separate line
-                         bodyLines.push(bodyLine);
+                        bodyLines.push(bodyLine);
                     } else if (bodyLine === 'do' && depth > 1) {
-                         bodyLines.push(bodyLine);
+                        bodyLines.push(bodyLine);
                     } else if (bodyLine === 'done' && depth > 0) {
-                         bodyLines.push(bodyLine);
+                        bodyLines.push(bodyLine);
                     }
                     j++;
                 }
-                
+
                 // Simple multi-line body extraction
                 // Refetch clean body
                 bodyLines = [];
                 j = i + 1;
-                while(j < lines.length) {
+                while (j < lines.length) {
                     const bl = lines[j].trim();
                     if (bl === 'done') break;
                     if (bl !== 'do') bodyLines.push(lines[j]); // Keep original indentation/content
@@ -465,16 +465,16 @@ const runScriptLines = (
 
         const result = executeCommand(line, cwd, currentFs, localSetFs, scriptVars);
         if (result.content) output += result.content + '\n';
-        if (result.type === 'error') output += `Error line ${i+1}: ${result.content}\n`;
+        if (result.type === 'error') output += `Error line ${i + 1}: ${result.content}\n`;
     }
 
     // IMPORTANT: Return type 'output' if there is content, so Terminal displays it.
     // 'success' is usually ignored by Terminal rendering unless it changes state.
     const finalOutput = output.trim();
-    return { 
-        id: uid(), 
-        type: finalOutput ? 'output' : 'success', 
-        content: finalOutput 
+    return {
+        id: uid(),
+        type: finalOutput ? 'output' : 'success',
+        content: finalOutput
     };
 };
 
@@ -488,12 +488,12 @@ const runSingleCommand = (
     inputString: string | null,
     isPiped: boolean = false
 ): TerminalOutput => {
-    
+
     const getTextContent = (fileParam: string | undefined): string | null => {
         if (fileParam) {
             const targetPath = resolvePath(cwd, fileParam);
             const node = getNode(currentFs, targetPath);
-            if (!node || node.type !== 'file') return null; 
+            if (!node || node.type !== 'file') return null;
             return node.content || '';
         }
         return inputString;
@@ -506,12 +506,12 @@ const runSingleCommand = (
             const reverse = hasFlag(params, 'r');
             const sortBySize = hasFlag(params, 'S');
             const pathArgs = params.filter(p => !p.startsWith('-'));
-            
+
             const getListing = (path: string, isArgument: boolean): string[] | string => {
                 const targetPath = resolvePath(cwd, path);
                 const node = getNode(currentFs, targetPath);
                 if (!node) return `ls: impossible d'accéder à '${path}': Aucun fichier ou dossier de ce type`;
-                
+
                 if (node.type === 'file') {
                     if (showDetails) {
                         const size = node.content?.length || 0;
@@ -519,21 +519,21 @@ const runSingleCommand = (
                     }
                     return node.name;
                 }
-                
+
                 if (node.children) {
                     let files = Object.keys(node.children);
                     if (!showAll) files = files.filter(name => !name.startsWith('.'));
                     else files = ['.', '..', ...files];
-                    
-                    files.sort(); 
+
+                    files.sort();
                     if (sortBySize) {
                         files.sort((a, b) => {
-                           const getNodeSize = (n: string) => {
-                               if (n === '.' || n === '..') return 4096;
-                               const child = node.children![n];
-                               return child.type === 'directory' ? 4096 : (child.content?.length || 0);
-                           };
-                           return getNodeSize(b) - getNodeSize(a); 
+                            const getNodeSize = (n: string) => {
+                                if (n === '.' || n === '..') return 4096;
+                                const child = node.children![n];
+                                return child.type === 'directory' ? 4096 : (child.content?.length || 0);
+                            };
+                            return getNodeSize(b) - getNodeSize(a);
                         });
                     }
                     if (reverse) files.reverse();
@@ -573,7 +573,7 @@ const runSingleCommand = (
 
         case 'cd': {
             let targetParam = params[0];
-            if (!targetParam || targetParam === '-') targetParam = '~'; 
+            if (!targetParam || targetParam === '-') targetParam = '~';
             const targetPath = resolvePath(cwd, targetParam);
             const node = getNode(currentFs, targetPath);
             if (!node || node.type !== 'directory') {
@@ -638,7 +638,7 @@ const runSingleCommand = (
                 const targetPath = resolvePath(cwd, file);
                 const [parent, name] = getParentAndName(targetPath, currentFs);
                 if (!parent || parent.type !== 'directory') return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Aucun fichier ou dossier de ce type` };
-                
+
                 if (!parent.children || !parent.children[name]) {
                     if (!canWrite(parent)) return { id: uid(), type: 'error', content: `touch: impossible de faire un touch '${file}': Permission non accordée` };
                     parent.children[name] = { type: 'file', name: name, permissions: '-rw-r--r--', owner: 'etudiant', content: '' };
@@ -664,27 +664,27 @@ const runSingleCommand = (
             if (sources.length > 1 && (!destNode || destNode.type !== 'directory')) return { id: uid(), type: 'error', content: `cp: la cible '${destParam}' n'est pas un répertoire` };
 
             for (const source of sources) {
-                 const srcPath = resolvePath(cwd, source);
-                 const srcNode = getNode(currentFs, srcPath);
-                 if (!srcNode) return { id: uid(), type: 'error', content: `cp: impossible d'évaluer '${source}': Aucun fichier ou dossier de ce type` };
-                 if (srcNode.type === 'directory' && !recursive) return { id: uid(), type: 'error', content: `cp: -r non spécifié ; omission du répertoire '${source}'` };
+                const srcPath = resolvePath(cwd, source);
+                const srcNode = getNode(currentFs, srcPath);
+                if (!srcNode) return { id: uid(), type: 'error', content: `cp: impossible d'évaluer '${source}': Aucun fichier ou dossier de ce type` };
+                if (srcNode.type === 'directory' && !recursive) return { id: uid(), type: 'error', content: `cp: -r non spécifié ; omission du répertoire '${source}'` };
 
-                 if (destNode && destNode.type === 'directory') {
-                     if (!canWrite(destNode)) return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}/${srcNode.name}': Permission non accordée` };
-                     if (destNode.children) {
-                         destNode.children[srcNode.name] = JSON.parse(JSON.stringify(srcNode));
-                         destNode.children[srcNode.name].owner = 'etudiant';
-                     }
-                 } else if (sources.length === 1 && destParent && destParent.type === 'directory') {
-                     if (!canWrite(destParent)) return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Permission non accordée` };
-                     if (destParent.children) {
+                if (destNode && destNode.type === 'directory') {
+                    if (!canWrite(destNode)) return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}/${srcNode.name}': Permission non accordée` };
+                    if (destNode.children) {
+                        destNode.children[srcNode.name] = JSON.parse(JSON.stringify(srcNode));
+                        destNode.children[srcNode.name].owner = 'etudiant';
+                    }
+                } else if (sources.length === 1 && destParent && destParent.type === 'directory') {
+                    if (!canWrite(destParent)) return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Permission non accordée` };
+                    if (destParent.children) {
                         destParent.children[destName] = JSON.parse(JSON.stringify(srcNode));
                         destParent.children[destName].name = destName;
                         destParent.children[destName].owner = 'etudiant';
-                     }
-                 } else {
-                     return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Aucun fichier ou dossier de ce type` };
-                 }
+                    }
+                } else {
+                    return { id: uid(), type: 'error', content: `cp: impossible de créer le fichier '${destParam}': Aucun fichier ou dossier de ce type` };
+                }
             }
             setFs(currentFs);
             return { id: uid(), type: 'success', content: '' };
@@ -706,7 +706,7 @@ const runSingleCommand = (
                 const [srcParent, srcName] = getParentAndName(srcPath, currentFs);
                 if (!srcParent || !srcParent.children || !srcParent.children[srcName]) return { id: uid(), type: 'error', content: `mv: impossible d'évaluer '${source}': Aucun fichier ou dossier de ce type` };
                 const srcNode = srcParent.children[srcName];
-                
+
                 if (!canWrite(srcParent)) return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}': Permission non accordée (source)` };
 
                 if (destNode && destNode.type === 'directory' && destNode.children) {
@@ -719,7 +719,7 @@ const runSingleCommand = (
                     destParent.children[destName].name = destName;
                     delete srcParent.children[srcName];
                 } else {
-                     return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}' vers '${destParam}'` };
+                    return { id: uid(), type: 'error', content: `mv: impossible de déplacer '${source}' vers '${destParam}'` };
                 }
             }
             setFs(currentFs);
@@ -734,18 +734,18 @@ const runSingleCommand = (
 
             for (const filename of files) {
                 if (filename.includes('*') || filename.includes('?')) {
-                     const [parent, pattern] = getParentAndName(resolvePath(cwd, filename), currentFs);
-                     if (parent && parent.children) {
-                         if (!canWrite(parent)) {
-                              if (!force) return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': Permission non accordée` };
-                              continue;
-                         }
-                         const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
-                         Object.keys(parent.children).forEach(k => {
-                             if (regex.test(k)) delete parent.children![k];
-                         });
-                     }
-                     continue;
+                    const [parent, pattern] = getParentAndName(resolvePath(cwd, filename), currentFs);
+                    if (parent && parent.children) {
+                        if (!canWrite(parent)) {
+                            if (!force) return { id: uid(), type: 'error', content: `rm: impossible de supprimer '${filename}': Permission non accordée` };
+                            continue;
+                        }
+                        const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+                        Object.keys(parent.children).forEach(k => {
+                            if (regex.test(k)) delete parent.children![k];
+                        });
+                    }
+                    continue;
                 }
                 const targetPath = resolvePath(cwd, filename);
                 const [parent, name] = getParentAndName(targetPath, currentFs);
@@ -778,12 +778,12 @@ const runSingleCommand = (
                 else remainingParams.push(p);
             }
             if (remainingParams.length < 2) {
-                 if (remainingParams.length === 1) return { id: uid(), type: 'error', content: `chmod: opérande manquant après '${remainingParams[0]}'` };
-                 return { id: uid(), type: 'error', content: 'chmod: mode manquant' };
+                if (remainingParams.length === 1) return { id: uid(), type: 'error', content: `chmod: opérande manquant après '${remainingParams[0]}'` };
+                return { id: uid(), type: 'error', content: 'chmod: mode manquant' };
             }
             mode = remainingParams[0];
             files = remainingParams.slice(1);
-            
+
             const modifyPermString = (currentPerms: string, operationMode: string, type: 'file' | 'directory'): string => {
                 const typeChar = type === 'directory' ? 'd' : '-';
                 if (/^[0-7]{3}$/.test(operationMode)) {
@@ -873,13 +873,13 @@ const runSingleCommand = (
             let prefixFile = false;
             if (fileParams.length === 0) contentToSearch = inputString || '';
             else {
-                 prefixFile = fileParams.length > 1;
-                 for (const fileParam of fileParams) {
+                prefixFile = fileParams.length > 1;
+                for (const fileParam of fileParams) {
                     const c = getTextContent(fileParam);
                     if (c === null) return { id: uid(), type: 'error', content: `grep: ${fileParam}: Aucun fichier ou dossier de ce type` };
                     if (prefixFile) contentToSearch += c.split('\n').map(l => `${fileParam}:${l}`).join('\n') + '\n';
                     else contentToSearch += c + '\n';
-                 }
+                }
             }
             const lines = contentToSearch.split('\n');
             let resultLines: string[] = [];
@@ -887,8 +887,8 @@ const runSingleCommand = (
                 let searchSpace = line;
                 let outputLine = line;
                 if (prefixFile) {
-                     const splitIdx = line.indexOf(':');
-                     if (splitIdx !== -1) searchSpace = line.substring(splitIdx + 1);
+                    const splitIdx = line.indexOf(':');
+                    if (splitIdx !== -1) searchSpace = line.substring(splitIdx + 1);
                 }
                 if (!searchSpace) return;
                 let match = false;
@@ -916,7 +916,7 @@ const runSingleCommand = (
             const fileParam = params.find(p => !p.startsWith('-'));
             const content = getTextContent(fileParam);
             if (content === null) return { id: uid(), type: 'error', content: `wc: ${fileParam}: Aucun fichier de ce type` };
-            
+
             const lines = content.split('\n');
             const lineCount = content === '' ? 0 : lines.length;
             const wordCount = content === '' ? 0 : content.trim().split(/\s+/).length;
@@ -1023,13 +1023,13 @@ const runSingleCommand = (
 
             const content = getTextContent(scriptFile);
             if (content === null) return { id: uid(), type: 'error', content: `${cmd}: ${scriptFile}: Aucun fichier ou dossier de ce type` };
-            
+
             return runScriptLines(content.split('\n'), scriptArgs, cwd, currentFs, setFs, {});
         }
 
         default:
-             // Handle ./script.sh directly here as a fallback command
-             if (cmd.startsWith('./')) {
+            // Handle ./script.sh directly here as a fallback command
+            if (cmd.startsWith('./')) {
                 const scriptFile = cmd.substring(2);
                 const scriptArgs = params;
                 const targetPath = resolvePath(cwd, scriptFile);
@@ -1037,113 +1037,113 @@ const runSingleCommand = (
 
                 if (!node) return { id: uid(), type: 'error', content: `bash: ${scriptFile}: Aucun fichier ou dossier de ce type` };
                 if (node.type === 'directory') return { id: uid(), type: 'error', content: `bash: ${scriptFile}: est un dossier` };
-                
+
                 if (!isExecutable(node.permissions)) {
                     return { id: uid(), type: 'error', content: `bash: ${scriptFile}: Permission non accordée` };
                 }
 
                 return runScriptLines((node.content || '').split('\n'), scriptArgs, cwd, currentFs, setFs, {});
-             }
+            }
             return { id: uid(), type: 'error', content: `${cmd}: commande introuvable` };
     }
 };
 
 // Main Execution Entry Point
 export const executeCommand = (
-  cmdStr: string, 
-  cwd: string, 
-  root: FileSystemNode,
-  setFs: (newFs: FileSystemNode) => void,
-  variables: Record<string, string> = {}
+    cmdStr: string,
+    cwd: string,
+    root: FileSystemNode,
+    setFs: (newFs: FileSystemNode) => void,
+    variables: Record<string, string> = {}
 ): TerminalOutput => {
-  const processedCmd = substituteVariables(cmdStr, variables);
+    const processedCmd = substituteVariables(cmdStr, variables);
 
-  // Pipe Splitting
-  const segments = processedCmd.split('|');
-  let inputForNext = null;
-  let finalResult: TerminalOutput = { id: uid(), type: 'success', content: '' };
-  
-  const currentFs = JSON.parse(JSON.stringify(root));
+    // Pipe Splitting
+    const segments = processedCmd.split('|');
+    let inputForNext = null;
+    let finalResult: TerminalOutput = { id: uid(), type: 'success', content: '' };
 
-  for (let i = 0; i < segments.length; i++) {
-      let segment = segments[i].trim();
-      if (!segment) continue;
+    const currentFs = JSON.parse(JSON.stringify(root));
 
-      const redirectIndex = segment.indexOf('>');
-      let redirectFile = null;
-      let isAppend = false;
+    for (let i = 0; i < segments.length; i++) {
+        let segment = segments[i].trim();
+        if (!segment) continue;
 
-      if (redirectIndex !== -1) {
-          const isDouble = segment.charAt(redirectIndex + 1) === '>';
-          redirectFile = segment.substring(redirectIndex + (isDouble ? 2 : 1)).trim();
-          isAppend = isDouble;
-          segment = segment.substring(0, redirectIndex).trim();
-      }
+        const redirectIndex = segment.indexOf('>');
+        let redirectFile = null;
+        let isAppend = false;
 
-      const argsRaw = segment.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
-      const argsParsed = argsRaw.map(arg => arg.replace(/"/g, '').replace(/'/g, ''));
-      const cmd = argsParsed[0];
-      const paramsParsed = argsParsed.slice(1);
+        if (redirectIndex !== -1) {
+            const isDouble = segment.charAt(redirectIndex + 1) === '>';
+            redirectFile = segment.substring(redirectIndex + (isDouble ? 2 : 1)).trim();
+            isAppend = isDouble;
+            segment = segment.substring(0, redirectIndex).trim();
+        }
 
-      const expandedParams: string[] = [];
-      paramsParsed.forEach((clean, idx) => {
-          const raw = argsRaw[idx + 1]; 
-          if ((raw.startsWith('"') || raw.startsWith("'")) && !raw.includes('*')) {
-              expandedParams.push(clean);
-          } else if ((clean.includes('*') || clean.includes('?')) && !(raw.startsWith('"') || raw.startsWith("'"))) {
-              expandedParams.push(...expandGlob(clean, cwd, currentFs));
-          } else {
-              expandedParams.push(clean);
-          }
-      });
-      const params = expandedParams;
-      
-      const isPiped = i < segments.length - 1;
+        const argsRaw = segment.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+        const argsParsed = argsRaw.map(arg => arg.replace(/"/g, '').replace(/'/g, ''));
+        const cmd = argsParsed[0];
+        const paramsParsed = argsParsed.slice(1);
 
-      const result = runSingleCommand(cmd, params, cwd, currentFs, setFs, inputForNext, isPiped);
+        const expandedParams: string[] = [];
+        paramsParsed.forEach((clean, idx) => {
+            const raw = argsRaw[idx + 1];
+            if ((raw.startsWith('"') || raw.startsWith("'")) && !raw.includes('*')) {
+                expandedParams.push(clean);
+            } else if ((clean.includes('*') || clean.includes('?')) && !(raw.startsWith('"') || raw.startsWith("'"))) {
+                expandedParams.push(...expandGlob(clean, cwd, currentFs));
+            } else {
+                expandedParams.push(clean);
+            }
+        });
+        const params = expandedParams;
 
-      if (result.type === 'error') {
-          return result;
-      }
+        const isPiped = i < segments.length - 1;
 
-      if (redirectFile) {
-          const targetPath = resolvePath(cwd, redirectFile);
-          const [parent, name] = getParentAndName(targetPath, currentFs);
-          
-          if (parent && parent.children) {
-              if (!canWrite(parent)) {
-                   return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
-              }
-              const existing = parent.children[name];
-              if (existing && !canWrite(existing)) {
-                   return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
-              }
+        const result = runSingleCommand(cmd, params, cwd, currentFs, setFs, inputForNext, isPiped);
 
-              const contentToWrite = result.content;
-              const newContent = (isAppend && existing?.content) ? existing.content + '\n' + contentToWrite : contentToWrite;
-              
-              parent.children[name] = {
-                  type: 'file',
-                  name: name,
-                  permissions: existing ? existing.permissions : '-rw-r--r--',
-                  owner: 'etudiant',
-                  content: newContent
-              };
-              setFs(currentFs);
-          } else {
-              return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Aucun fichier ou dossier de ce type` };
-          }
-          inputForNext = '';
-          finalResult = { id: uid(), type: 'success', content: '' };
-      } else {
-          inputForNext = result.content;
-          finalResult = result;
-      }
-      
-      if (cmd === 'cd' && result.cwd) {
-          finalResult.cwd = result.cwd;
-      }
-  }
+        if (result.type === 'error') {
+            return result;
+        }
 
-  return finalResult;
+        if (redirectFile) {
+            const targetPath = resolvePath(cwd, redirectFile);
+            const [parent, name] = getParentAndName(targetPath, currentFs);
+
+            if (parent && parent.children) {
+                if (!canWrite(parent)) {
+                    return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
+                }
+                const existing = parent.children[name];
+                if (existing && !canWrite(existing)) {
+                    return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Permission non accordée` };
+                }
+
+                const contentToWrite = result.content;
+                const newContent = (isAppend && existing?.content) ? existing.content + '\n' + contentToWrite : contentToWrite;
+
+                parent.children[name] = {
+                    type: 'file',
+                    name: name,
+                    permissions: existing ? existing.permissions : '-rw-r--r--',
+                    owner: 'etudiant',
+                    content: newContent
+                };
+                setFs(currentFs);
+            } else {
+                return { id: uid(), type: 'error', content: `bash: ${redirectFile}: Aucun fichier ou dossier de ce type` };
+            }
+            inputForNext = '';
+            finalResult = { id: uid(), type: 'success', content: '' };
+        } else {
+            inputForNext = result.content;
+            finalResult = result;
+        }
+
+        if (cmd === 'cd' && result.cwd) {
+            finalResult.cwd = result.cwd;
+        }
+    }
+
+    return finalResult;
 };
