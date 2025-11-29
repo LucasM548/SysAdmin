@@ -301,7 +301,7 @@ export const CHAPTERS: Chapter[] = [
         title: "Caractères Jokers (Wildcards)",
         content: [
           "`*` : Remplace n'importe quelle suite de caractères.",
-          "`?` : Remplace un seul caractère.",
+          "`.` : Remplace un seul caractère.",
           "`[a-z]` : Une plage de caractères.",
           "Exemple : `ls *.txt` liste tous les fichiers texte."
         ]
