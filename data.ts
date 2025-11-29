@@ -264,10 +264,9 @@ export const CHAPTERS: Chapter[] = [
     exercises: [
       {
         id: "ex3_1",
-        question: "Créez un fichier `telephone.txt` contenant ces données :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520",
-        hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
-        validationType: 'file_exists',
-        validationValue: '/home/etudiant/telephone.txt',
+        question: "Créez un fichier `telephone.txt` contenant ces données, avec **chaque entrée sur une ligne séparée** :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520", hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
+        validationType: 'file_content',
+        validationValue: '/home/etudiant/telephone.txt:8316\ntoto',
         completed: false
       },
       {
@@ -283,7 +282,7 @@ export const CHAPTERS: Chapter[] = [
         question: "Affichez uniquement les lignes des personnes dont le numéro contient '83'.",
         hint: "grep '83' telephone.txt (ou cat telephone.txt | grep '83')",
         validationType: 'output_match',
-        validationValue: "8316", // Checks if the output contains one of the phone numbers
+        validationValue: "8316",
         completed: false
       },
       {
