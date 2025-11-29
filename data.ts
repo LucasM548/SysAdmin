@@ -250,7 +250,7 @@ export const CHAPTERS: Chapter[] = [
     exercises: [
       {
         id: "ex3_1",
-        question: "Créez un fichier `telephone.txt` contenant ces données, avec **chaque entrée sur une ligne séparée** :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520", hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
+        question: "Créez un fichier `telephone.txt` contenant ces données, avec chaque entrée sur une ligne séparée :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520", hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
         validationValue: 'file:/home/etudiant/telephone.txt|content:regex:8316[\\s\\S]*toto',
         completed: false
       },
@@ -301,7 +301,7 @@ export const CHAPTERS: Chapter[] = [
         title: "Caractères Jokers (Wildcards)",
         content: [
           "`*` : Remplace n'importe quelle suite de caractères.",
-          "`.` : Remplace un seul caractère.",
+          "`?` : Remplace un seul caractère.",
           "`[a-z]` : Une plage de caractères.",
           "Exemple : `ls *.txt` liste tous les fichiers texte."
         ]
@@ -694,11 +694,19 @@ export const CHAPTERS: Chapter[] = [
         title: "Globbing Avancé (Partie 1)",
         content: [
           "`*` : Remplace n'importe quelle suite de caractères.",
-          "`?` : Remplace **exactement un** caractère.",
+          "`?` : Remplace exactement un caractère.",
           "Attention avec `echo` : le shell remplace les jokers *avant* d'exécuter la commande. `echo ls *` affiche littéralement 'ls' suivi des fichiers.",
           "Exercice : `echo ??` affiche tous les fichiers de exactement 2 lettres."
         ],
         code: "ls ??\necho *[0-9]*"
+      },
+      {
+        title: "Subtilité du Expressions Régulières Étendues (ERE)",
+        content: [
+          "`.` : Remplace n'importe quel caractère.",
+          "`?` : Rend l'élément qui le précède optionnel"
+        ],
+        code: "grep -E \"colou?r\" fichier.txt //correspond à color et colour \ngrep -E \"a.c\" fichier.txt //correspond à abc, axc, a3c"
       },
       {
         title: "Expressions Régulières (Partie 2)",
@@ -724,7 +732,7 @@ export const CHAPTERS: Chapter[] = [
       {
         title: "Permissions : Piège de la Suppression (Partie 5)",
         content: [
-          "Règle d'or : Pour SUPPRIMER un fichier, il faut avoir le droit d'écriture (`w`) sur le **DOSSIER PARENT**.",
+          "Règle d'or : Pour SUPPRIMER un fichier, il faut avoir le droit d'écriture (`w`) sur le DOSSIER PARENT.",
           "Les droits sur le fichier lui-même (même `r--`) n'empêchent pas sa suppression si on contrôle le dossier.",
           "Inversement, si le dossier est en lecture seule (`r-x`), impossible de supprimer un fichier dedans, même si on est propriétaire."
         ]
