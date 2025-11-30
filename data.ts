@@ -251,7 +251,7 @@ export const CHAPTERS: Chapter[] = [
       {
         id: "ex3_1",
         question: "Créez un fichier `telephone.txt` contenant ces données, avec chaque entrée sur une ligne séparée :\narthur 8316\ntoto 8321\ntiti 8623\nzoe 8520", hint: "echo -e 'arthur 8316\\ntoto 8321\\ntiti 8623\\nzoe 8520' > telephone.txt",
-        validationValue: 'file:/home/etudiant/telephone.txt|content:regex:8316[\\s\\S]*toto',
+        validationValue: 'file:/home/etudiant/telephone.txt|content:regex:arthur 8316\\s*\\ntoto',
         completed: false
       },
       {
@@ -394,28 +394,28 @@ export const CHAPTERS: Chapter[] = [
         id: "ex5_3",
         question: "Enlevez le droit d'écriture sur `Secret` pour tout le monde (y compris vous).",
         hint: "chmod -w Secret (ou chmod 555 Secret)",
-        validationValue: 'file:/home/etudiant/Secret|perms:dr-xr-xr-x',
+        validationValue: 'dir:/home/etudiant/Secret|perms:dr-xr-xr-x|cmd:chmod',
         completed: false
       },
       {
         id: "ex5_4",
         question: "Essayez maintenant de créer un fichier dans `Secret` (Test d'interdiction).",
         hint: "touch Secret/test.txt (Cela devrait échouer !)",
-        validationValue: 'regexCmd:^touch\\s+Secret\\/test\\.txt$|output:Permission non accordée',
+        validationValue: 'output:Permission non accordée',
         completed: false
       },
       {
         id: "ex5_5",
         question: "Redonnez-vous le droit d'écriture sur `Secret`.",
         hint: "chmod u+w Secret (ou chmod 755 Secret)",
-        validationValue: 'file:/home/etudiant/Secret|perms:drwxr-xr-x',
+        validationValue: 'dir:/home/etudiant/Secret|perms:drwxr-xr-x',
         completed: false
       },
       {
         id: "ex5_6",
         question: "Utilisez l'option récursive pour donner tous les droits (777) à `Secret` et son contenu.",
         hint: "chmod -R 777 Secret",
-        validationValue: 'file:/home/etudiant/Secret|perms:drwxrwxrwx',
+        validationValue: 'dir:/home/etudiant/Secret|perms:drwxrwxrwx',
         completed: false
       }
     ]
