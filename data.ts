@@ -408,14 +408,14 @@ export const CHAPTERS: Chapter[] = [
         id: "ex5_5",
         question: "Redonnez-vous le droit d'écriture sur `Secret`.",
         hint: "chmod u+w Secret (ou chmod 755 Secret)",
-        validationValue: 'dir:/home/etudiant/Secret|perms:drwxr-xr-x',
+        validationValue: 'dir:/home/etudiant/Secret|perms:drwxr-xr-x|cmd:chmod',
         completed: false
       },
       {
         id: "ex5_6",
         question: "Utilisez l'option récursive pour donner tous les droits (777) à `Secret` et son contenu.",
         hint: "chmod -R 777 Secret",
-        validationValue: 'dir:/home/etudiant/Secret|perms:drwxrwxrwx',
+        validationValue: 'dir:/home/etudiant/Secret|perms:drwxrwxrwx|cmd:chmod',
         completed: false
       }
     ]
